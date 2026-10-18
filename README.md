@@ -1,13 +1,21 @@
 # Vocadada
 
+A small, playful vocabulary trainer. Make a project with word pairs in two languages, look through them, then test yourself in either direction. The test counts good answers and mistakes and gives stars at the end.
+
+Built with Rust and [egui](https://github.com/emilk/egui). It runs as a desktop app or in the browser, where it can be installed as an app (PWA) on phones and tablets.
+
+<p>
+  <a href="docs/screenshots/view.png"><img src="docs/screenshots/view.png" width="260" alt="Looking through the words of a project"></a>
+  <a href="docs/screenshots/test.png"><img src="docs/screenshots/test.png" width="260" alt="Testing a word, with the answer and an example"></a>
+  <a href="docs/screenshots/results.png"><img src="docs/screenshots/results.png" width="260" alt="Test results with stars"></a>
+</p>
+
+## Try it online
+
 **▶ [Open Vocadada in your browser](https://bwalter.github.io/vocadada/)**: no installation or account needed.
 
 > [!NOTE]
 > Your words stay on your device. They are saved only in your browser's local storage, never sent to a server. To move a project to another device, use **Share** and **Import**.
-
-A small, playful vocabulary trainer. Make a project with word pairs in two languages, look through them, then test yourself in either direction. The test counts good answers and mistakes and gives stars at the end.
-
-Built with Rust and [egui](https://github.com/emilk/egui). It runs as a desktop app or in the browser, where it can be installed as an app (PWA) on phones and tablets.
 
 ## Requirements
 
