@@ -25,7 +25,8 @@ i18n-embed = { version = "0.16", features = ["desktop-requester"] }
 getrandom = { version = "0.2", features = ["js"] }
 i18n-embed = { version = "0.16", features = ["web-sys-requester"] }
 wasm-bindgen-futures = "0.4"
-web-sys = { version = "0.3", features = ["Clipboard", "Document", "Element", "HtmlCanvasElement", "Navigator", "Node", "Storage", "Window"] }
+web-sys = { version = "0.3", features = ["Clipboard", "Document", "Element", "HtmlCanvasElement", "Navigator", "Node", "Response", "Storage", "Window"] }
+js-sys = "0.3"
 
 [dev-dependencies]
 fluent-syntax = "0.12"

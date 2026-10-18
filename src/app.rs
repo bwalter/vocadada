@@ -172,6 +172,7 @@ fn small_buttons(ui: &mut egui::Ui, labels: &[String]) -> Option<usize> {
 impl VocadadaApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         theme::apply(&cc.egui_ctx);
+        crate::fonts::install(&cc.egui_ctx);
         i18n::set_from_system();
         let (library, message) = match Library::load() {
             Ok(library) => (library, None),
