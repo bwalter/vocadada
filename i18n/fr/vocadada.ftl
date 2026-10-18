@@ -65,6 +65,7 @@ default-language-2 = Langue 2
 add-word-title = ➕ Ajouter un mot
 add = Ajouter
 add-word-tip = Astuce : appuie sur Entrée pour passer à la case suivante.
+add-word-tip-desktop = Astuce : appuie sur Entrée pour passer à la case suivante, Maj+Entrée pour une nouvelle ligne dans l'exemple.
 no-words-edit = Pas encore de mots ! Ajoute ton premier mot ci-dessous.
 remove-word = Supprimer ce mot
 example = 💬 Exemple

@@ -65,6 +65,7 @@ default-language-2 = Language 2
 add-word-title = ➕ Add a new word
 add = Add
 add-word-tip = Tip: press Enter to jump to the next box.
+add-word-tip-desktop = Tip: press Enter to jump to the next box, Shift+Enter for a new line in the example.
 no-words-edit = No words yet! Add your first word below.
 remove-word = Remove this word
 example = 💬 Example

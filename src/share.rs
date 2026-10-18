@@ -1,8 +1,8 @@
 //! Compact text code for sharing a project via messengers.
 //!
 //! Payload: one format byte, then the project as lines (`name`, `lang1`, `lang2`, then
-//! `word1\tword2` or `word1\tword2\texample` per entry), either raw or raw-deflated, whichever is shorter.
-//! Encoded as URL-safe base64 without padding.
+//! `word1\tword2` or `word1\tword2\texample` per entry; line breaks in examples become `\r`), either raw or
+//! raw-deflated, whichever is shorter. Encoded as URL-safe base64 without padding.
 
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 
@@ -24,7 +24,7 @@ pub fn encode(project: &Project) -> String {
         text.push_str(&clean(&entry.word1));
         text.push('\t');
         text.push_str(&clean(&entry.word2));
-        let example = clean(&entry.example);
+        let example = entry.example.trim().replace("\r\n", "\n").replace(['\r', '\t'], " ").replace('\n', "\r");
         if !example.is_empty() {
             text.push('\t');
             text.push_str(&example);
@@ -68,7 +68,7 @@ pub fn decode(code: &str) -> Result<Project, String> {
             let (Some(word1), Some(word2)) = (fields.next(), fields.next()) else {
                 return Err(invalid());
             };
-            let example = fields.next().unwrap_or_default().to_string();
+            let example = fields.next().unwrap_or_default().replace('\r', "\n");
             Ok(Entry { word1: word1.to_string(), word2: word2.to_string(), example })
         })
         .collect::<Result<_, String>>()?;
@@ -88,7 +88,7 @@ mod tests {
                 .map(|i| Entry {
                     word1: format!("Hund {i}"),
                     word2: format!("le chien {i}"),
-                    example: if i % 2 == 0 { format!("Le chien {i} aboie.") } else { String::new() },
+                    example: if i % 2 == 0 { format!("Le chien {i} aboie.\nIl a faim.") } else { String::new() },
                 })
                 .collect(),
         }

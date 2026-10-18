@@ -65,6 +65,7 @@ default-language-2 = Sprache 2
 add-word-title = ➕ Neues Wort hinzufügen
 add = Hinzufügen
 add-word-tip = Tipp: Mit Enter springst du ins nächste Feld.
+add-word-tip-desktop = Tipp: Mit Enter springst du ins nächste Feld, mit Umschalt+Enter gibt es eine neue Zeile im Beispiel.
 no-words-edit = Noch keine Wörter! Füge unten dein erstes Wort hinzu.
 remove-word = Dieses Wort entfernen
 example = 💬 Beispiel

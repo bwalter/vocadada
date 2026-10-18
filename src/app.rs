@@ -88,6 +88,16 @@ fn enter_pressed(ui: &egui::Ui, resp: &egui::Response) -> bool {
     resp.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter))
 }
 
+/// Example field: may have several lines. On desktop Enter keeps its usual meaning and Shift+Enter adds a line.
+fn example_edit(text: &mut String, narrow: bool) -> TextEdit<'_> {
+    let edit = TextEdit::multiline(text).desired_rows(1);
+    if narrow {
+        edit
+    } else {
+        edit.return_key(egui::KeyboardShortcut::new(Modifiers::SHIFT, Key::Enter))
+    }
+}
+
 fn focus_if(pending: &mut Option<Focus>, which: Focus, resp: &egui::Response) {
     if *pending == Some(which) {
         resp.request_focus();
@@ -699,11 +709,14 @@ impl VocadadaApp {
                         ui.add(TextEdit::singleline(text).hint_text(hint).desired_width(width))
                     };
                     let add_label = tr!("add");
+                    let example_field = |ui: &mut egui::Ui, text: &mut String, width: f32| {
+                        ui.add(example_edit(text, narrow).hint_text(&example_hint).desired_width(width))
+                    };
                     let (r1, r2, r3, add_clicked) = if narrow {
                         let w = ui.available_width();
                         let r1 = field(ui, &mut self.new_word1, &project.lang1, w);
                         let r2 = field(ui, &mut self.new_word2, &project.lang2, w);
-                        let r3 = field(ui, &mut self.new_example, &example_hint, w);
+                        let r3 = example_field(ui, &mut self.new_example, w);
                         let add = big_button(ui, &add_label, theme::ORANGE, vec2(w, 44.0)).clicked();
                         (r1, r2, r3, add)
                     } else {
@@ -712,19 +725,28 @@ impl VocadadaApp {
                             let w = (ui.available_width() - add_w - 3.0 * ui.spacing().item_spacing.x) / 3.0 - 8.0;
                             let r1 = field(ui, &mut self.new_word1, &project.lang1, w);
                             let r2 = field(ui, &mut self.new_word2, &project.lang2, w);
-                            let r3 = field(ui, &mut self.new_example, &example_hint, w);
+                            let r3 = example_field(ui, &mut self.new_example, w);
                             let add = big_button(ui, &add_label, theme::ORANGE, vec2(add_w, 36.0)).clicked();
                             (r1, r2, r3, add)
                         })
                         .inner
                     };
+                    // The example field is multi-line, so it doesn't lose focus on Enter.
+                    // Checked before moving focus, so the Enter that jumps into it doesn't also add the word.
+                    let example_done = !narrow
+                        && r3.has_focus()
+                        && ui.input(|i| {
+                            i.events.iter().any(|e| {
+                                matches!(e, egui::Event::Key { key: Key::Enter, pressed: true, modifiers, .. } if !modifiers.shift)
+                            })
+                        });
                     if enter_pressed(ui, &r1) {
                         r2.request_focus();
                     }
                     if enter_pressed(ui, &r2) {
                         r3.request_focus();
                     }
-                    if add_clicked || enter_pressed(ui, &r3) {
+                    if add_clicked || example_done {
                         let w1 = self.new_word1.trim();
                         let w2 = self.new_word2.trim();
                         if w1.is_empty() {
@@ -745,7 +767,7 @@ impl VocadadaApp {
                         }
                     }
                     ui.label(
-                        RichText::new(tr!("add-word-tip"))
+                        RichText::new(if narrow { tr!("add-word-tip") } else { tr!("add-word-tip-desktop") })
                             .small()
                             .color(theme::TEXT_SOFT),
                     );
@@ -779,7 +801,7 @@ impl VocadadaApp {
                                 remove = Some(i);
                             }
                         });
-                        let example = TextEdit::singleline(&mut entry.example).hint_text(&example_hint);
+                        let example = example_edit(&mut entry.example, true).hint_text(&example_hint);
                         dirty |= ui.add_sized(vec2(ui.available_width(), h), example).changed();
                         ui.separator();
                     }
@@ -804,7 +826,8 @@ impl VocadadaApp {
                             let field = |text| TextEdit::singleline(text).desired_width(col_w).min_size(size);
                             dirty |= ui.add(field(&mut entry.word1)).changed();
                             dirty |= ui.add(field(&mut entry.word2)).changed();
-                            dirty |= ui.add(field(&mut entry.example)).changed();
+                            let example = example_edit(&mut entry.example, false).desired_width(col_w).min_size(size);
+                            dirty |= ui.add(example).changed();
                             if ui.button("🗑").on_hover_text(tr!("remove-word")).clicked() {
                                 remove = Some(i);
                             }
