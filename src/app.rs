@@ -472,17 +472,20 @@ impl VocadadaApp {
         let mut close = false;
         let mut import = None;
         let width = 460.0_f32.min(ctx.screen_rect().width() - 64.0);
+        // The content scrolls if the window is too short; the buttons (measured last frame) always stay visible.
+        let buttons_id = egui::Id::new("share_dialog_buttons");
+        let buttons_height = ctx.data(|d| d.get_temp::<f32>(buttons_id)).unwrap_or(60.0);
+        let scroll_height = (ctx.screen_rect().height() - 100.0 - buttons_height).max(80.0);
         let modal = egui::Modal::new(egui::Id::new("share_dialog")).show(ctx, |ui| {
             ui.set_width(width);
             match &mut dialog {
                 ShareDialog::Export { code, copied } => {
-                    let name = self.selected.map(|i| self.library.projects[i].name.clone()).unwrap_or_default();
-                    ui.label(RichText::new(tr!("share-title", name = name)).size(26.0).strong().color(theme::PURPLE));
-                    ui.label(tr!("share-body"));
-                    ui.add_space(6.0);
-                    let max_height = ctx.screen_rect().height() - 220.0;
                     let mut qr_fits = false;
-                    ScrollArea::vertical().max_height(max_height).show(ui, |ui| {
+                    ScrollArea::vertical().max_height(scroll_height).show(ui, |ui| {
+                        let name = self.selected.map(|i| self.library.projects[i].name.clone()).unwrap_or_default();
+                        ui.label(RichText::new(tr!("share-title", name = name)).size(26.0).strong().color(theme::PURPLE));
+                        ui.label(tr!("share-body"));
+                        ui.add_space(6.0);
                         ui.vertical_centered(|ui| {
                             qr_fits = theme::qr_code(ui, code, 260.0_f32.min(width));
                             if !qr_fits {
@@ -504,7 +507,9 @@ impl VocadadaApp {
                         buttons.push((label(Copied::Qr, tr!("copy-qr")), theme::BLUE, Some(Copied::Qr)));
                     }
                     buttons.push((tr!("close"), theme::GRAY, None));
-                    match button_row(ui, buttons, false, 48.0) {
+                    let row = ui.scope(|ui| button_row(ui, buttons, false, 48.0));
+                    ctx.data_mut(|d| d.insert_temp(buttons_id, row.response.rect.height()));
+                    match row.inner {
                         Some(Some(Copied::Text)) => {
                             ui.ctx().copy_text(code.clone());
                             *copied = Some(Copied::Text);
@@ -526,66 +531,73 @@ impl VocadadaApp {
                     if let Some(text) = self.pasted.borrow_mut().take() {
                         *code = text;
                     }
-                    ui.label(RichText::new(tr!("import-title")).size(26.0).strong().color(theme::PURPLE));
-                    ui.label(tr!("import-body"));
-                    ui.add_space(6.0);
-                    ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
-                        ui.add(
-                            TextEdit::multiline(code)
-                                .hint_text(tr!("import-hint"))
-                                .font(egui::TextStyle::Monospace)
-                                .desired_rows(3)
-                                .desired_width(f32::INFINITY),
-                        );
-                    });
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        ui.horizontal_wrapped(|ui| {
-                            if ui.add(egui::Button::new(tr!("paste")).min_size(vec2(0.0, 36.0))).clicked() {
-                                self.request_paste(ui.ctx());
-                            }
-                            let scanning = camera.scanner.is_some();
-                            let label = if scanning { tr!("scan-stop") } else { tr!("scan-qr") };
-                            if ui.add(egui::Button::new(label).min_size(vec2(0.0, 36.0))).clicked() {
-                                camera.scanner = if scanning { None } else { crate::scanner::Scanner::start(ui.ctx()) };
-                                camera.failed = !scanning && camera.scanner.is_none();
-                            }
+                    let mut decoded = None;
+                    ScrollArea::vertical().max_height(scroll_height).show(ui, |ui| {
+                        ui.label(RichText::new(tr!("import-title")).size(26.0).strong().color(theme::PURPLE));
+                        ui.label(tr!("import-body"));
+                        ui.add_space(6.0);
+                        ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                            ui.add(
+                                TextEdit::multiline(code)
+                                    .hint_text(tr!("import-hint"))
+                                    .font(egui::TextStyle::Monospace)
+                                    .desired_rows(3)
+                                    .desired_width(f32::INFINITY),
+                            );
                         });
-                        if let Some(scanner) = &mut camera.scanner {
-                            match scanner.show(ui, width) {
-                                crate::scanner::Scan::Found(text) => {
-                                    *code = text;
-                                    camera.scanner = None;
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            ui.horizontal_wrapped(|ui| {
+                                if ui.add(egui::Button::new(tr!("paste")).min_size(vec2(0.0, 36.0))).clicked() {
+                                    self.request_paste(ui.ctx());
                                 }
-                                crate::scanner::Scan::Failed => {
-                                    camera.failed = true;
-                                    camera.scanner = None;
+                                let scanning = camera.scanner.is_some();
+                                let label = if scanning { tr!("scan-stop") } else { tr!("scan-qr") };
+                                if ui.add(egui::Button::new(label).min_size(vec2(0.0, 36.0))).clicked() {
+                                    camera.scanner =
+                                        if scanning { None } else { crate::scanner::Scanner::start(ui.ctx()) };
+                                    camera.failed = !scanning && camera.scanner.is_none();
                                 }
-                                crate::scanner::Scan::Waiting => {}
+                            });
+                            if let Some(scanner) = &mut camera.scanner {
+                                match scanner.show(ui, width) {
+                                    crate::scanner::Scan::Found(text) => {
+                                        *code = text;
+                                        camera.scanner = None;
+                                    }
+                                    crate::scanner::Scan::Failed => {
+                                        camera.failed = true;
+                                        camera.scanner = None;
+                                    }
+                                    crate::scanner::Scan::Waiting => {}
+                                }
+                            }
+                            if camera.failed {
+                                ui.label(RichText::new(tr!("camera-error")).color(theme::RED));
                             }
                         }
-                        if camera.failed {
-                            ui.label(RichText::new(tr!("camera-error")).color(theme::RED));
+                        decoded = (!code.trim().is_empty()).then(|| share::decode(code));
+                        match &decoded {
+                            Some(Ok(project)) => {
+                                let text =
+                                    tr!("import-preview", name = project.name.as_str(), count = project.entries.len());
+                                ui.label(RichText::new(text).strong().color(theme::GREEN_DARK));
+                            }
+                            Some(Err(e)) => {
+                                ui.label(RichText::new(e).color(theme::RED));
+                            }
+                            None => {}
                         }
-                    }
-                    let decoded = (!code.trim().is_empty()).then(|| share::decode(code));
-                    match &decoded {
-                        Some(Ok(project)) => {
-                            let text = tr!("import-preview", name = project.name.as_str(), count = project.entries.len());
-                            ui.label(RichText::new(text).strong().color(theme::GREEN_DARK));
-                        }
-                        Some(Err(e)) => {
-                            ui.label(RichText::new(e).color(theme::RED));
-                        }
-                        None => {}
-                    }
+                    });
                     ui.add_space(10.0);
                     let mut buttons = Vec::new();
                     if let Some(Ok(_)) = &decoded {
                         buttons.push((tr!("import"), theme::GREEN, true));
                     }
                     buttons.push((tr!("cancel"), theme::GRAY, false));
-                    match button_row(ui, buttons, false, 48.0) {
+                    let row = ui.scope(|ui| button_row(ui, buttons, false, 48.0));
+                    ctx.data_mut(|d| d.insert_temp(buttons_id, row.response.rect.height()));
+                    match row.inner {
                         Some(true) => import = decoded.and_then(Result::ok),
                         Some(false) => close = true,
                         None => {}
