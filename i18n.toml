@@ -1,0 +1,5 @@
+# Used by i18n-embed / i18n-embed-fl. All message ids are checked at compile time against the fallback language.
+fallback_language = "en"
+
+[fluent]
+assets_dir = "i18n"

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#7c4dff"/>
+  <rect x="116" y="116" width="280" height="280" rx="56" fill="#ffffff"/>
+  <text x="256" y="338" text-anchor="middle" font-family="Arial Rounded MT Bold, Helvetica, Arial, sans-serif" font-weight="bold" font-size="230" fill="#7c4dff">V</text>
+  <path transform="translate(352 160)" fill="#ffc107" stroke="#ffffff" stroke-width="8" stroke-linejoin="round"
+        d="M0,-44 L12.9,-17.8 L41.8,-13.6 L20.9,6.8 L25.9,35.6 L0,22 L-25.9,35.6 L-20.9,6.8 L-41.8,-13.6 L-12.9,-17.8 Z"/>
+</svg>
