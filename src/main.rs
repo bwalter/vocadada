@@ -4,6 +4,7 @@ mod app;
 mod i18n;
 mod model;
 mod quiz;
+mod share;
 mod theme;
 
 #[cfg(not(target_arch = "wasm32"))]

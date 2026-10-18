@@ -8,6 +8,7 @@ use std::collections::HashSet;
 use crate::i18n::{self, tr, Language};
 use crate::model::{Entry, Library, Project};
 use crate::quiz::{Direction, Quiz};
+use crate::share;
 use crate::theme::{self, big_button, text_width, Confetti};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -47,6 +48,11 @@ enum ResultAction {
     Back,
 }
 
+enum ShareDialog {
+    Export { code: String, copied: bool },
+    Import { code: String },
+}
+
 pub struct VocadadaApp {
     library: Library,
     dirty: bool,
@@ -56,6 +62,10 @@ pub struct VocadadaApp {
     new_project_name: Option<String>,
     rename_text: Option<String>,
     confirm_delete: bool,
+    share_dialog: Option<ShareDialog>,
+    /// Text read from the browser clipboard, filled in asynchronously.
+    #[cfg(target_arch = "wasm32")]
+    pasted: std::rc::Rc<std::cell::RefCell<Option<String>>>,
     new_word1: String,
     new_word2: String,
     pending_focus: Option<Focus>,
@@ -123,6 +133,39 @@ fn button_row<T>(ui: &mut egui::Ui, buttons: Vec<(String, Color32, T)>, stack: b
     clicked
 }
 
+fn small_button(ui: &mut egui::Ui, text: &str, font: f32) -> bool {
+    ui.spacing_mut().button_padding.x = 6.0;
+    let size = vec2(ui.available_width(), 38.0);
+    ui.add(egui::Button::new(RichText::new(text).size(font)).truncate().min_size(size))
+        .clicked()
+}
+
+/// Small buttons two per row (with a smaller font if needed), otherwise below each other.
+/// Returns which button was clicked.
+fn small_buttons(ui: &mut egui::Ui, labels: &[String]) -> Option<usize> {
+    let half = (ui.available_width() - ui.spacing().item_spacing.x) / 2.0;
+    let widest = labels.iter().map(|l| text_width(ui, l, 17.0)).fold(1.0, f32::max);
+    let font = (17.0 * (half - 20.0) / widest).min(17.0);
+    let mut clicked = None;
+    if font >= 12.0 {
+        for (row, pair) in labels.chunks(2).enumerate() {
+            if let [a, b] = pair {
+                let (ca, cb) = ui.columns(2, |cols| (small_button(&mut cols[0], a, font), small_button(&mut cols[1], b, font)));
+                clicked = clicked.or(ca.then_some(2 * row)).or(cb.then_some(2 * row + 1));
+            } else if small_button(ui, &pair[0], font) {
+                clicked = Some(2 * row);
+            }
+        }
+    } else {
+        for (i, label) in labels.iter().enumerate() {
+            if small_button(ui, label, 17.0) {
+                clicked = Some(i);
+            }
+        }
+    }
+    clicked
+}
+
 impl VocadadaApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         theme::apply(&cc.egui_ctx);
@@ -144,6 +187,9 @@ impl VocadadaApp {
             new_project_name: None,
             rename_text: None,
             confirm_delete: false,
+            share_dialog: None,
+            #[cfg(target_arch = "wasm32")]
+            pasted: Default::default(),
             new_word1: String::new(),
             new_word2: String::new(),
             pending_focus: None,
@@ -345,32 +391,133 @@ impl VocadadaApp {
         if big_button(ui, &tr!("new-project"), theme::PINK, vec2(width, 46.0)).clicked() {
             self.start_new_project();
         }
-        if let Some(i) = self.selected {
-            let (rename, delete) = (tr!("rename"), tr!("delete"));
-            let padding = 6.0;
-            let small = |ui: &mut egui::Ui, text: &str| {
-                ui.spacing_mut().button_padding.x = padding;
-                let size = vec2(ui.available_width(), 38.0);
-                ui.add(egui::Button::new(RichText::new(text).size(17.0)).truncate().min_size(size))
-            };
-            let half = (width - ui.spacing().item_spacing.x) / 2.0;
-            let side_by_side = [&rename, &delete]
-                .iter()
-                .all(|text| text_width(ui, text, 17.0) + 2.0 * padding <= half);
-            let (rename_clicked, delete_clicked) = if side_by_side {
-                ui.columns(2, |cols| {
-                    (small(&mut cols[0], &rename).clicked(), small(&mut cols[1], &delete).clicked())
-                })
-            } else {
-                (small(ui, &rename).clicked(), small(ui, &delete).clicked())
-            };
-            if rename_clicked {
+        let Some(i) = self.selected else {
+            if small_button(ui, &tr!("import"), 17.0) {
+                self.share_dialog = Some(ShareDialog::Import { code: String::new() });
+            }
+            return;
+        };
+        let labels = [tr!("rename"), tr!("delete"), tr!("share"), tr!("import")];
+        match small_buttons(ui, &labels) {
+            Some(0) => {
                 self.rename_text = Some(self.library.projects[i].name.clone());
                 self.pending_focus = Some(Focus::Rename);
             }
-            if delete_clicked {
-                self.confirm_delete = true;
+            Some(1) => self.confirm_delete = true,
+            Some(2) => {
+                let code = share::encode(&self.library.projects[i]);
+                self.share_dialog = Some(ShareDialog::Export { code, copied: false });
             }
+            Some(3) => self.share_dialog = Some(ShareDialog::Import { code: String::new() }),
+            _ => {}
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn request_paste(&self, ctx: &egui::Context) {
+        let (slot, ctx) = (self.pasted.clone(), ctx.clone());
+        wasm_bindgen_futures::spawn_local(async move {
+            let Some(window) = web_sys::window() else { return };
+            let promise = window.navigator().clipboard().read_text();
+            if let Some(text) = wasm_bindgen_futures::JsFuture::from(promise).await.ok().and_then(|v| v.as_string()) {
+                *slot.borrow_mut() = Some(text);
+                ctx.request_repaint();
+            }
+        });
+    }
+
+    fn share_dialog(&mut self, ctx: &egui::Context) {
+        let Some(mut dialog) = self.share_dialog.take() else {
+            return;
+        };
+        let mut close = false;
+        let mut import = None;
+        let width = 460.0_f32.min(ctx.screen_rect().width() - 64.0);
+        let modal = egui::Modal::new(egui::Id::new("share_dialog")).show(ctx, |ui| {
+            ui.set_width(width);
+            match &mut dialog {
+                ShareDialog::Export { code, copied } => {
+                    let name = self.selected.map(|i| self.library.projects[i].name.clone()).unwrap_or_default();
+                    ui.label(RichText::new(tr!("share-title", name = name)).size(26.0).strong().color(theme::PURPLE));
+                    ui.label(tr!("share-body"));
+                    ui.add_space(6.0);
+                    ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                        ui.add(
+                            TextEdit::multiline(&mut code.as_str())
+                                .font(egui::TextStyle::Monospace)
+                                .desired_width(f32::INFINITY),
+                        );
+                    });
+                    ui.add_space(10.0);
+                    let copy_label = if *copied { tr!("copied") } else { tr!("copy") };
+                    let buttons = vec![(copy_label, theme::PURPLE, true), (tr!("close"), theme::GRAY, false)];
+                    match button_row(ui, buttons, false, 48.0) {
+                        Some(true) => {
+                            ui.ctx().copy_text(code.clone());
+                            *copied = true;
+                        }
+                        Some(false) => close = true,
+                        None => {}
+                    }
+                }
+                ShareDialog::Import { code } => {
+                    #[cfg(target_arch = "wasm32")]
+                    if let Some(text) = self.pasted.borrow_mut().take() {
+                        *code = text;
+                    }
+                    ui.label(RichText::new(tr!("import-title")).size(26.0).strong().color(theme::PURPLE));
+                    ui.label(tr!("import-body"));
+                    ui.add_space(6.0);
+                    ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                        ui.add(
+                            TextEdit::multiline(code)
+                                .hint_text(tr!("import-hint"))
+                                .font(egui::TextStyle::Monospace)
+                                .desired_rows(3)
+                                .desired_width(f32::INFINITY),
+                        );
+                    });
+                    #[cfg(target_arch = "wasm32")]
+                    if ui.add(egui::Button::new(tr!("paste")).min_size(vec2(0.0, 36.0))).clicked() {
+                        self.request_paste(ui.ctx());
+                    }
+                    let decoded = (!code.trim().is_empty()).then(|| share::decode(code));
+                    match &decoded {
+                        Some(Ok(project)) => {
+                            let text = tr!("import-preview", name = project.name.as_str(), count = project.entries.len());
+                            ui.label(RichText::new(text).strong().color(theme::GREEN_DARK));
+                        }
+                        Some(Err(e)) => {
+                            ui.label(RichText::new(e).color(theme::RED));
+                        }
+                        None => {}
+                    }
+                    ui.add_space(10.0);
+                    let mut buttons = Vec::new();
+                    if let Some(Ok(_)) = &decoded {
+                        buttons.push((tr!("import"), theme::GREEN, true));
+                    }
+                    buttons.push((tr!("cancel"), theme::GRAY, false));
+                    match button_row(ui, buttons, false, 48.0) {
+                        Some(true) => import = decoded.and_then(Result::ok),
+                        Some(false) => close = true,
+                        None => {}
+                    }
+                }
+            }
+        });
+        if let Some(project) = import {
+            let empty = project.entries.is_empty();
+            self.library.projects.push(project);
+            self.dirty = true;
+            self.select(self.library.projects.len() - 1);
+            if !empty {
+                self.mode = Mode::View;
+            }
+            close = true;
+        }
+        if !close && !modal.should_close() {
+            self.share_dialog = Some(dialog);
         }
     }
 
@@ -1006,6 +1153,7 @@ impl eframe::App for VocadadaApp {
         }
 
         self.delete_dialog(ctx);
+        self.share_dialog(ctx);
         self.confetti.show(ctx);
 
         if self.dirty {

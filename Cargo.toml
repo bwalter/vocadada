@@ -10,6 +10,8 @@ eframe = "0.31"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rand = "0.8"
+base64 = "0.22"
+miniz_oxide = "0.8"
 i18n-embed = { version = "0.16", features = ["fluent-system"] }
 i18n-embed-fl = "0.10"
 # debug-embed: also embed the translations in debug builds (needed for the web, which has no file system).
@@ -23,7 +25,7 @@ i18n-embed = { version = "0.16", features = ["desktop-requester"] }
 getrandom = { version = "0.2", features = ["js"] }
 i18n-embed = { version = "0.16", features = ["web-sys-requester"] }
 wasm-bindgen-futures = "0.4"
-web-sys = { version = "0.3", features = ["Document", "Element", "HtmlCanvasElement", "Node", "Storage", "Window"] }
+web-sys = { version = "0.3", features = ["Clipboard", "Document", "Element", "HtmlCanvasElement", "Navigator", "Node", "Storage", "Window"] }
 
 [dev-dependencies]
 fluent-syntax = "0.12"

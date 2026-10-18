@@ -24,6 +24,26 @@ delete-body = "{ $name }" and all its words will be gone forever.
 delete-confirm = 🗑 Yes, delete
 delete-keep = No, keep it
 
+## Share and import
+
+share = 📤 Share
+import = 📥 Import
+share-title = Share "{ $name }"
+share-body = Copy this code and send it, e.g. via WhatsApp or Signal. The other person pastes it under 📥 Import.
+copy = 📋 Copy
+copied = ✔ Copied!
+close = Close
+import-title = Import a project
+import-body = Paste the code you received:
+import-hint = Paste the code here
+paste = 📋 Paste
+import-preview =
+    { $count ->
+        [one] "{ $name }" with { $count } word
+       *[other] "{ $name }" with { $count } words
+    }
+import-invalid = This code doesn't look right. Did you copy all of it?
+
 ## Welcome screen
 
 welcome-title = Welcome to Vocadada!
