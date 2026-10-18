@@ -75,6 +75,20 @@ pub fn decode(code: &str) -> Result<Project, String> {
     Ok(Project { name: name.to_string(), lang1: lang1.to_string(), lang2: lang2.to_string(), entries })
 }
 
+/// Reads the text of a QR code in an RGBA picture (`w` x `h` pixels), if there is one.
+pub fn read_qr(rgba: &[u8], w: usize, h: usize) -> Option<String> {
+    let grey: Vec<u8> = rgba
+        .chunks_exact(4)
+        .map(|p| {
+            let luma = (p[0] as u32 * 77 + p[1] as u32 * 150 + p[2] as u32 * 29) >> 8;
+            // Transparent parts count as white background.
+            ((luma * p[3] as u32 + 255 * (255 - p[3] as u32)) / 255) as u8
+        })
+        .collect();
+    let mut image = rqrr::PreparedImage::prepare_from_greyscale(w, h, |x, y| grey[y * w + x]);
+    image.detect_grids().into_iter().find_map(|grid| grid.decode().ok().map(|(_, text)| text))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -118,19 +132,11 @@ mod tests {
     }
 
     #[test]
-    fn survives_qr_code() {
+    fn survives_qr_picture() {
         let code = encode(&project(30));
-        let qr = qrcode::QrCode::with_error_correction_level(&code, qrcode::EcLevel::L).unwrap();
-        let (n, scale, quiet) = (qr.width(), 4, 4);
-        let side = (n + 2 * quiet) * scale;
-        let colors = qr.to_colors();
-        let mut image = rqrr::PreparedImage::prepare_from_greyscale(side, side, |x, y| {
-            let (mx, my) = ((x / scale).wrapping_sub(quiet), (y / scale).wrapping_sub(quiet));
-            let dark = mx < n && my < n && colors[my * n + mx] == qrcode::Color::Dark;
-            if dark { 0 } else { 255 }
-        });
-        let grids = image.detect_grids();
-        let (_, scanned) = grids[0].decode().unwrap();
+        let image = crate::theme::qr_image(&code).unwrap();
+        let rgba: Vec<u8> = image.pixels.iter().flat_map(|c| c.to_array()).collect();
+        let scanned = read_qr(&rgba, image.width(), image.height()).unwrap();
         assert_eq!(decode(&scanned).unwrap().entries.len(), 30);
     }
 

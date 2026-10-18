@@ -59,13 +59,25 @@ enum Copied {
     Qr,
 }
 
-/// Import dialog: QR code scanning with the camera (web only).
+/// Import dialog: QR code scanning with the camera (web) or pasting from the clipboard (desktop).
 #[derive(Default)]
 struct Camera {
     #[cfg(target_arch = "wasm32")]
     scanner: Option<crate::scanner::Scanner>,
     #[cfg(target_arch = "wasm32")]
     failed: bool,
+    #[cfg(not(target_arch = "wasm32"))]
+    paste_error: Option<String>,
+}
+
+/// Clipboard content as import code: the text, or the text of a QR code if it holds a picture.
+#[cfg(not(target_arch = "wasm32"))]
+fn paste_code() -> Result<String, String> {
+    let mut clipboard = arboard::Clipboard::new().map_err(|_| tr!("paste-empty"))?;
+    if let Ok(image) = clipboard.get_image() {
+        return share::read_qr(&image.bytes, image.width, image.height).ok_or_else(|| tr!("qr-not-found"));
+    }
+    clipboard.get_text().map_err(|_| tr!("paste-empty"))
 }
 
 impl ShareDialog {
@@ -525,8 +537,6 @@ impl VocadadaApp {
                     }
                 }
                 ShareDialog::Import { code, camera } => {
-                    #[cfg(not(target_arch = "wasm32"))]
-                    let _ = camera;
                     #[cfg(target_arch = "wasm32")]
                     if let Some(text) = self.pasted.borrow_mut().take() {
                         *code = text;
@@ -545,6 +555,22 @@ impl VocadadaApp {
                                     .desired_width(f32::INFINITY),
                             );
                         });
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            let paste = egui::Button::new(tr!("paste-text-or-qr")).min_size(vec2(0.0, 36.0));
+                            if ui.add(paste).clicked() {
+                                match paste_code() {
+                                    Ok(text) => {
+                                        *code = text;
+                                        camera.paste_error = None;
+                                    }
+                                    Err(e) => camera.paste_error = Some(e),
+                                }
+                            }
+                            if let Some(e) = &camera.paste_error {
+                                ui.label(RichText::new(e).color(theme::RED));
+                            }
+                        }
                         #[cfg(target_arch = "wasm32")]
                         {
                             ui.horizontal_wrapped(|ui| {

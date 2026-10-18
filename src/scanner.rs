@@ -76,7 +76,7 @@ impl Scanner {
             if now - self.last_scan >= SCAN_INTERVAL || self.texture.is_none() {
                 self.last_scan = now;
                 if let Some(rgba) = self.grab(sw, sh) {
-                    found = decode(&rgba, sw as usize, sh as usize);
+                    found = crate::share::read_qr(&rgba, sw as usize, sh as usize);
                     let image = ColorImage::from_rgba_unmultiplied([sw as usize, sh as usize], &rgba);
                     match &mut self.texture {
                         Some(texture) => texture.set(image, TextureOptions::LINEAR),
@@ -138,13 +138,4 @@ async fn open_camera(video: &HtmlVideoElement) -> Result<MediaStream, JsValue> {
     video.set_src_object(Some(&stream));
     JsFuture::from(video.play()?).await?;
     Ok(stream)
-}
-
-fn decode(rgba: &[u8], w: usize, h: usize) -> Option<String> {
-    let grey: Vec<u8> = rgba
-        .chunks_exact(4)
-        .map(|p| ((p[0] as u32 * 77 + p[1] as u32 * 150 + p[2] as u32 * 29) >> 8) as u8)
-        .collect();
-    let mut image = rqrr::PreparedImage::prepare_from_greyscale(w, h, |x, y| grey[y * w + x]);
-    image.detect_grids().into_iter().find_map(|grid| grid.decode().ok().map(|(_, text)| text))
 }

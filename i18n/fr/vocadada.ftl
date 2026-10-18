@@ -42,6 +42,9 @@ import-title = Importer un projet
 import-body = Colle le code que tu as reçu :
 import-hint = Colle le code ici
 paste = 📋 Coller
+paste-text-or-qr = 📋 Coller le texte ou l'image QR
+paste-empty = Il n'y a rien à coller.
+qr-not-found = Aucun QR code trouvé dans l'image copiée.
 import-preview =
     { $count ->
         [one] « { $name } » avec { $count } mot

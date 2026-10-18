@@ -17,10 +17,13 @@ i18n-embed-fl = "0.10"
 # debug-embed: also embed the translations in debug builds (needed for the web, which has no file system).
 rust-embed = { version = "8", features = ["debug-embed"] }
 qrcode = { version = "0.14.1", default-features = false }
+rqrr = "0.11"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 dirs = "5"
 i18n-embed = { version = "0.16", features = ["desktop-requester"] }
+# Reading pictures from the clipboard (egui only pastes text). Same version eframe already uses.
+arboard = { version = "3.6", default-features = false, features = ["image-data"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2", features = ["js"] }
@@ -32,8 +35,6 @@ web-sys = { version = "0.3", features = [
     "Navigator", "Node", "Response", "Storage", "Window",
 ] }
 js-sys = "0.3"
-rqrr = "0.11"
 
 [dev-dependencies]
 fluent-syntax = "0.12"
-rqrr = "0.11"
