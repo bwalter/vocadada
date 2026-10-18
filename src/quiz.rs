@@ -11,6 +11,7 @@ pub enum Direction {
 pub struct Card {
     pub question: String,
     pub answer: String,
+    pub example: String,
 }
 
 pub struct Quiz {
@@ -40,6 +41,7 @@ impl Quiz {
                 Card {
                     question: q.trim().to_string(),
                     answer: a.trim().to_string(),
+                    example: e.example.trim().to_string(),
                 }
             })
             .collect();
@@ -175,7 +177,7 @@ mod tests {
     fn project() -> Project {
         let mut p = Project::new("Test".into());
         for (a, b) in [("dog", "chien"), ("cat", "chat"), ("", "vide")] {
-            p.entries.push(Entry { word1: a.into(), word2: b.into() });
+            p.entries.push(Entry { word1: a.into(), word2: b.into(), ..Default::default() });
         }
         p
     }

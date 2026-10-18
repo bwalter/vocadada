@@ -1,7 +1,8 @@
 //! Compact text code for sharing a project via messengers.
 //!
-//! Payload: one format byte, then the project as lines (`name`, `lang1`, `lang2`, then `word1\tword2`
-//! per entry), either raw or raw-deflated, whichever is shorter. Encoded as URL-safe base64 without padding.
+//! Payload: one format byte, then the project as lines (`name`, `lang1`, `lang2`, then
+//! `word1\tword2` or `word1\tword2\texample` per entry), either raw or raw-deflated, whichever is shorter.
+//! Encoded as URL-safe base64 without padding.
 
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 
@@ -23,6 +24,11 @@ pub fn encode(project: &Project) -> String {
         text.push_str(&clean(&entry.word1));
         text.push('\t');
         text.push_str(&clean(&entry.word2));
+        let example = clean(&entry.example);
+        if !example.is_empty() {
+            text.push('\t');
+            text.push_str(&example);
+        }
     }
     let raw = text.into_bytes();
     let deflated = miniz_oxide::deflate::compress_to_vec(&raw, 10);
@@ -58,8 +64,12 @@ pub fn decode(code: &str) -> Result<Project, String> {
     };
     let entries = lines
         .map(|line| {
-            let (word1, word2) = line.split_once('\t').ok_or_else(invalid)?;
-            Ok(Entry { word1: word1.to_string(), word2: word2.to_string() })
+            let mut fields = line.splitn(3, '\t');
+            let (Some(word1), Some(word2)) = (fields.next(), fields.next()) else {
+                return Err(invalid());
+            };
+            let example = fields.next().unwrap_or_default().to_string();
+            Ok(Entry { word1: word1.to_string(), word2: word2.to_string(), example })
         })
         .collect::<Result<_, String>>()?;
     Ok(Project { name: name.to_string(), lang1: lang1.to_string(), lang2: lang2.to_string(), entries })
@@ -75,7 +85,11 @@ mod tests {
             lang1: "Deutsch".into(),
             lang2: "Français".into(),
             entries: (0..n)
-                .map(|i| Entry { word1: format!("Hund {i}"), word2: format!("le chien {i}") })
+                .map(|i| Entry {
+                    word1: format!("Hund {i}"),
+                    word2: format!("le chien {i}"),
+                    example: if i % 2 == 0 { format!("Le chien {i} aboie.") } else { String::new() },
+                })
                 .collect(),
         }
     }
@@ -91,7 +105,7 @@ mod tests {
             assert_eq!(decoded.lang2, original.lang2);
             assert_eq!(decoded.entries.len(), n);
             for (a, b) in decoded.entries.iter().zip(&original.entries) {
-                assert_eq!((&a.word1, &a.word2), (&b.word1, &b.word2));
+                assert_eq!((&a.word1, &a.word2, &a.example), (&b.word1, &b.word2, &b.example));
             }
         }
     }

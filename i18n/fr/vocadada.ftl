@@ -67,6 +67,8 @@ add = Ajouter
 add-word-tip = Astuce : appuie sur Entrée pour passer à la case suivante.
 no-words-edit = Pas encore de mots ! Ajoute ton premier mot ci-dessous.
 remove-word = Supprimer ce mot
+example = 💬 Exemple
+example-hint = Exemple (facultatif)
 
 ## View mode
 
@@ -75,6 +77,7 @@ shuffle = 🔀 Mélanger
 original-order = ↩ Ordre d’origine
 hide = 🙈 Masquer
 tap-to-peek = ❓ Révéler
+show-example = Afficher l'exemple
 
 ## Test mode
 

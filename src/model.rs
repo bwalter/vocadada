@@ -7,6 +7,9 @@ use std::{fs, io::ErrorKind, path::PathBuf};
 pub struct Entry {
     pub word1: String,
     pub word2: String,
+    /// Optional example sentence; not asked in the test, only shown with the answer.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub example: String,
 }
 
 impl Entry {

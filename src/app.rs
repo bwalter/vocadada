@@ -68,12 +68,15 @@ pub struct VocadadaApp {
     pasted: std::rc::Rc<std::cell::RefCell<Option<String>>>,
     new_word1: String,
     new_word2: String,
+    new_example: String,
     pending_focus: Option<Focus>,
     view_order: Vec<usize>,
     /// View mode: column (0 or 1) whose words are hidden.
     view_hidden: Option<usize>,
     /// View mode: entries whose hidden word is currently revealed.
     peeked: HashSet<usize>,
+    /// View mode: entries whose example is shown.
+    shown_examples: HashSet<usize>,
     quiz: Option<Quiz>,
     confetti: Confetti,
     narrow: bool,
@@ -192,10 +195,12 @@ impl VocadadaApp {
             pasted: Default::default(),
             new_word1: String::new(),
             new_word2: String::new(),
+            new_example: String::new(),
             pending_focus: None,
             view_order: Vec::new(),
             view_hidden: None,
             peeked: HashSet::new(),
+            shown_examples: HashSet::new(),
             quiz: None,
             confetti: Confetti::default(),
             narrow: false,
@@ -212,8 +217,10 @@ impl VocadadaApp {
         self.quiz = None;
         self.view_order.clear();
         self.peeked.clear();
+        self.shown_examples.clear();
         self.new_word1.clear();
         self.new_word2.clear();
+        self.new_example.clear();
         self.rename_text = None;
         if self.library.projects[index].entries.is_empty() {
             self.mode = Mode::Edit;
@@ -676,7 +683,9 @@ impl VocadadaApp {
         });
         ui.add_space(10.0);
 
-        let col_w = ((ui.available_width() - 130.0) / 2.0).max(80.0);
+        // Below this, columns stop shrinking and the word list scrolls horizontally instead.
+        let col_w = ((ui.available_width() - 150.0) / 3.0).max(160.0);
+        let example_hint = tr!("example-hint");
 
         egui::TopBottomPanel::bottom(egui::Id::new("add_word_panel"))
             .frame(egui::Frame::new().inner_margin(Margin::symmetric(0, 10)))
@@ -689,25 +698,32 @@ impl VocadadaApp {
                         ui.add(TextEdit::singleline(text).hint_text(hint).desired_width(width))
                     };
                     let add_label = tr!("add");
-                    let (r1, r2, add_clicked) = if narrow {
+                    let (r1, r2, r3, add_clicked) = if narrow {
                         let w = ui.available_width();
                         let r1 = field(ui, &mut self.new_word1, &project.lang1, w);
                         let r2 = field(ui, &mut self.new_word2, &project.lang2, w);
+                        let r3 = field(ui, &mut self.new_example, &example_hint, w);
                         let add = big_button(ui, &add_label, theme::ORANGE, vec2(w, 44.0)).clicked();
-                        (r1, r2, add)
+                        (r1, r2, r3, add)
                     } else {
                         ui.horizontal(|ui| {
-                            let r1 = field(ui, &mut self.new_word1, &project.lang1, col_w - 30.0);
-                            let r2 = field(ui, &mut self.new_word2, &project.lang2, col_w - 30.0);
-                            let add = big_button(ui, &add_label, theme::ORANGE, vec2(90.0, 36.0)).clicked();
-                            (r1, r2, add)
+                            let add_w = (text_width(ui, &add_label, 22.0) + 2.0 * ui.spacing().button_padding.x).max(90.0);
+                            let w = (ui.available_width() - add_w - 3.0 * ui.spacing().item_spacing.x) / 3.0 - 8.0;
+                            let r1 = field(ui, &mut self.new_word1, &project.lang1, w);
+                            let r2 = field(ui, &mut self.new_word2, &project.lang2, w);
+                            let r3 = field(ui, &mut self.new_example, &example_hint, w);
+                            let add = big_button(ui, &add_label, theme::ORANGE, vec2(add_w, 36.0)).clicked();
+                            (r1, r2, r3, add)
                         })
                         .inner
                     };
                     if enter_pressed(ui, &r1) {
                         r2.request_focus();
                     }
-                    if add_clicked || enter_pressed(ui, &r2) {
+                    if enter_pressed(ui, &r2) {
+                        r3.request_focus();
+                    }
+                    if add_clicked || enter_pressed(ui, &r3) {
                         let w1 = self.new_word1.trim();
                         let w2 = self.new_word2.trim();
                         if w1.is_empty() {
@@ -718,9 +734,11 @@ impl VocadadaApp {
                             project.entries.push(Entry {
                                 word1: w1.to_string(),
                                 word2: w2.to_string(),
+                                example: self.new_example.trim().to_string(),
                             });
                             self.new_word1.clear();
                             self.new_word2.clear();
+                            self.new_example.clear();
                             dirty = true;
                             r1.request_focus();
                         }
@@ -744,23 +762,48 @@ impl VocadadaApp {
             });
         } else {
             let mut remove = None;
-            ScrollArea::vertical().auto_shrink([false; 2]).show(ui, |ui| {
+            let scroll = if narrow { ScrollArea::vertical() } else { ScrollArea::both() };
+            scroll.auto_shrink([false; 2]).show(ui, |ui| {
+                if narrow {
+                    // Phone: the example gets its own full-width line below the two words.
+                    for (i, entry) in project.entries.iter_mut().enumerate() {
+                        let h = ui.spacing().interact_size.y;
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new(format!("{}.", i + 1)).color(theme::TEXT_SOFT));
+                            ui.spacing_mut().button_padding = vec2(4.0, 4.0);
+                            let w = (ui.available_width() - 40.0 - 3.0 * ui.spacing().item_spacing.x) / 2.0;
+                            dirty |= ui.add_sized(vec2(w, h), TextEdit::singleline(&mut entry.word1)).changed();
+                            dirty |= ui.add_sized(vec2(w, h), TextEdit::singleline(&mut entry.word2)).changed();
+                            if ui.add_sized(vec2(40.0, h), egui::Button::new("🗑")).on_hover_text(tr!("remove-word")).clicked() {
+                                remove = Some(i);
+                            }
+                        });
+                        let example = TextEdit::singleline(&mut entry.example).hint_text(&example_hint);
+                        dirty |= ui.add_sized(vec2(ui.available_width(), h), example).changed();
+                        ui.separator();
+                    }
+                    return;
+                }
                 egui::Grid::new("word_grid")
-                    .num_columns(4)
+                    .num_columns(5)
                     .striped(true)
                     .spacing(vec2(10.0, 8.0))
                     .show(ui, |ui| {
                         ui.label("");
                         ui.label(RichText::new(&project.lang1).size(22.0).strong().color(theme::BLUE));
                         ui.label(RichText::new(&project.lang2).size(22.0).strong().color(theme::ORANGE));
+                        ui.label(RichText::new(tr!("example")).size(22.0).strong().color(theme::TEXT_SOFT));
                         ui.label("");
                         ui.end_row();
                         for (i, entry) in project.entries.iter_mut().enumerate() {
                             ui.label(RichText::new(format!("{}.", i + 1)).color(theme::TEXT_SOFT));
                             // Grid cells clamp `desired_width` to the previous column width; `min_size` isn't clamped.
+                            // Both are needed so the columns can grow and shrink with the window.
                             let size = vec2(col_w, 0.0);
-                            dirty |= ui.add(TextEdit::singleline(&mut entry.word1).min_size(size)).changed();
-                            dirty |= ui.add(TextEdit::singleline(&mut entry.word2).min_size(size)).changed();
+                            let field = |text| TextEdit::singleline(text).desired_width(col_w).min_size(size);
+                            dirty |= ui.add(field(&mut entry.word1)).changed();
+                            dirty |= ui.add(field(&mut entry.word2)).changed();
+                            dirty |= ui.add(field(&mut entry.example)).changed();
                             if ui.button("🗑").on_hover_text(tr!("remove-word")).clicked() {
                                 remove = Some(i);
                             }
@@ -832,17 +875,25 @@ impl VocadadaApp {
         egui::Frame::new()
             .inner_margin(Margin::symmetric(18, 0))
             .show(ui, |ui| {
-                ui.columns(2, |cols| {
-                    cols[0].label(RichText::new(&project.lang1).size(22.0).strong().color(theme::BLUE));
-                    cols[1].label(RichText::new(&project.lang2).size(22.0).strong().color(theme::ORANGE));
+                // Same width as the word columns in the cards, which leave room for the example button.
+                let words_w = ui.available_width() - 40.0 - ui.spacing().item_spacing.x;
+                ui.allocate_ui(vec2(words_w, 0.0), |ui| {
+                    ui.set_width(words_w);
+                    ui.columns(2, |cols| {
+                        cols[0].label(RichText::new(&project.lang1).size(22.0).strong().color(theme::BLUE));
+                        cols[1].label(RichText::new(&project.lang2).size(22.0).strong().color(theme::ORANGE));
+                    });
                 });
             });
 
         let mut toggle_peek = None;
+        let mut toggle_example = None;
         ScrollArea::vertical().auto_shrink([false; 2]).show(ui, |ui| {
             for i in visible {
                 let entry = &project.entries[i];
                 let peeked = self.peeked.contains(&i);
+                let example = entry.example.trim();
+                let show_example = self.shown_examples.contains(&i);
                 theme::card()
                     .inner_margin(Margin::symmetric(18, 12))
                     .show(ui, |ui| {
@@ -850,24 +901,58 @@ impl VocadadaApp {
                             (&entry.word1, theme::BLUE, theme::BLUE_DARK),
                             (&entry.word2, theme::ORANGE, theme::ORANGE_DARK),
                         ];
-                        ui.columns(2, |cols| {
-                            for (col, (ui, (word, color, dark))) in cols.iter_mut().zip(words).enumerate() {
-                                let hidden = self.view_hidden == Some(col);
-                                let clicked = if hidden && !peeked {
-                                    theme::hidden_word(ui, color).clicked()
-                                } else {
-                                    let label = egui::Label::new(RichText::new(word).size(26.0).color(dark));
-                                    ui.add(label.sense(Sense::click())).clicked()
-                                };
-                                if hidden && clicked {
-                                    toggle_peek = Some(i);
+                        ui.set_width(ui.available_width());
+                        let button_size = 40.0;
+                        let words_w = ui.available_width() - button_size - ui.spacing().item_spacing.x;
+                        let row = ui.allocate_ui(vec2(words_w, 0.0), |ui| {
+                            ui.set_width(words_w);
+                            ui.columns(2, |cols| {
+                                for (col, (ui, (word, color, dark))) in cols.iter_mut().zip(words).enumerate() {
+                                    let hidden = self.view_hidden == Some(col);
+                                    let clicked = if hidden && !peeked {
+                                        theme::hidden_word(ui, color).clicked()
+                                    } else {
+                                        let label = egui::Label::new(RichText::new(word).size(26.0).color(dark));
+                                        ui.add(label.sense(Sense::click())).clicked()
+                                    };
+                                    if hidden && clicked {
+                                        toggle_peek = Some(i);
+                                    }
                                 }
-                            }
+                            });
                         });
+                        if !example.is_empty() {
+                            let rect = egui::Rect::from_center_size(
+                                egui::pos2(ui.max_rect().right() - button_size / 2.0, row.response.rect.center().y),
+                                vec2(button_size, button_size),
+                            );
+                            let button = egui::Button::new(RichText::new("💬").size(20.0)).selected(show_example);
+                            let clicked = ui
+                                .scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
+                                    // Small padding so the button can't grow wider than the space kept for it.
+                                    ui.spacing_mut().button_padding = vec2(4.0, 4.0);
+                                    ui.add_sized(rect.size(), button).on_hover_text(tr!("show-example")).clicked()
+                                })
+                                .inner;
+                            if clicked {
+                                toggle_example = Some(i);
+                            }
+                        }
+                        if show_example && !example.is_empty() {
+                            ui.add(
+                                egui::Label::new(RichText::new(example).size(18.0).italics().color(theme::TEXT_SOFT))
+                                    .wrap(),
+                            );
+                        }
                     });
                 ui.add_space(2.0);
             }
         });
+        if let Some(i) = toggle_example {
+            if !self.shown_examples.remove(&i) {
+                self.shown_examples.insert(i);
+            }
+        }
         if let Some(i) = toggle_peek {
             if !self.peeked.remove(&i) {
                 self.peeked.insert(i);
@@ -980,6 +1065,15 @@ impl VocadadaApp {
                             )
                             .wrap(),
                         );
+                        if !card.example.is_empty() {
+                            ui.add_space(4.0);
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(&card.example).size(20.0).italics().color(theme::GREEN_DARK),
+                                )
+                                .wrap(),
+                            );
+                        }
                     });
                 });
             ui.add_space(20.0);
