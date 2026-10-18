@@ -5,6 +5,8 @@ mod fonts;
 mod i18n;
 mod model;
 mod quiz;
+#[cfg(target_arch = "wasm32")]
+mod scanner;
 mod share;
 mod theme;
 

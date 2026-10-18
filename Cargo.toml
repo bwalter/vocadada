@@ -16,6 +16,7 @@ i18n-embed = { version = "0.16", features = ["fluent-system"] }
 i18n-embed-fl = "0.10"
 # debug-embed: also embed the translations in debug builds (needed for the web, which has no file system).
 rust-embed = { version = "8", features = ["debug-embed"] }
+qrcode = { version = "0.14.1", default-features = false }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 dirs = "5"
@@ -25,8 +26,14 @@ i18n-embed = { version = "0.16", features = ["desktop-requester"] }
 getrandom = { version = "0.2", features = ["js"] }
 i18n-embed = { version = "0.16", features = ["web-sys-requester"] }
 wasm-bindgen-futures = "0.4"
-web-sys = { version = "0.3", features = ["Clipboard", "Document", "Element", "HtmlCanvasElement", "Navigator", "Node", "Response", "Storage", "Window"] }
+web-sys = { version = "0.3", features = [
+    "CanvasRenderingContext2d", "Clipboard", "Document", "Element", "HtmlCanvasElement", "HtmlMediaElement",
+    "HtmlVideoElement", "ImageData", "MediaDevices", "MediaStream", "MediaStreamConstraints", "MediaStreamTrack",
+    "Navigator", "Node", "Response", "Storage", "Window",
+] }
 js-sys = "0.3"
+rqrr = "0.11"
 
 [dev-dependencies]
 fluent-syntax = "0.12"
+rqrr = "0.11"

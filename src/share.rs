@@ -118,6 +118,23 @@ mod tests {
     }
 
     #[test]
+    fn survives_qr_code() {
+        let code = encode(&project(30));
+        let qr = qrcode::QrCode::with_error_correction_level(&code, qrcode::EcLevel::L).unwrap();
+        let (n, scale, quiet) = (qr.width(), 4, 4);
+        let side = (n + 2 * quiet) * scale;
+        let colors = qr.to_colors();
+        let mut image = rqrr::PreparedImage::prepare_from_greyscale(side, side, |x, y| {
+            let (mx, my) = ((x / scale).wrapping_sub(quiet), (y / scale).wrapping_sub(quiet));
+            let dark = mx < n && my < n && colors[my * n + mx] == qrcode::Color::Dark;
+            if dark { 0 } else { 255 }
+        });
+        let grids = image.detect_grids();
+        let (_, scanned) = grids[0].decode().unwrap();
+        assert_eq!(decode(&scanned).unwrap().entries.len(), 30);
+    }
+
+    #[test]
     fn rejects_garbage() {
         assert!(decode("").is_err());
         assert!(decode("hello world").is_err());

@@ -49,8 +49,29 @@ enum ResultAction {
 }
 
 enum ShareDialog {
-    Export { code: String, copied: bool },
-    Import { code: String },
+    Export { code: String, copied: Option<Copied> },
+    Import { code: String, camera: Camera },
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Copied {
+    Text,
+    Qr,
+}
+
+/// Import dialog: QR code scanning with the camera (web only).
+#[derive(Default)]
+struct Camera {
+    #[cfg(target_arch = "wasm32")]
+    scanner: Option<crate::scanner::Scanner>,
+    #[cfg(target_arch = "wasm32")]
+    failed: bool,
+}
+
+impl ShareDialog {
+    fn import() -> Self {
+        Self::Import { code: String::new(), camera: Camera::default() }
+    }
 }
 
 pub struct VocadadaApp {
@@ -411,7 +432,7 @@ impl VocadadaApp {
         }
         let Some(i) = self.selected else {
             if small_button(ui, &tr!("import"), 17.0) {
-                self.share_dialog = Some(ShareDialog::Import { code: String::new() });
+                self.share_dialog = Some(ShareDialog::import());
             }
             return;
         };
@@ -424,9 +445,9 @@ impl VocadadaApp {
             Some(1) => self.confirm_delete = true,
             Some(2) => {
                 let code = share::encode(&self.library.projects[i]);
-                self.share_dialog = Some(ShareDialog::Export { code, copied: false });
+                self.share_dialog = Some(ShareDialog::Export { code, copied: None });
             }
-            Some(3) => self.share_dialog = Some(ShareDialog::Import { code: String::new() }),
+            Some(3) => self.share_dialog = Some(ShareDialog::import()),
             _ => {}
         }
     }
@@ -459,26 +480,48 @@ impl VocadadaApp {
                     ui.label(RichText::new(tr!("share-title", name = name)).size(26.0).strong().color(theme::PURPLE));
                     ui.label(tr!("share-body"));
                     ui.add_space(6.0);
-                    ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                    let max_height = ctx.screen_rect().height() - 220.0;
+                    let mut qr_fits = false;
+                    ScrollArea::vertical().max_height(max_height).show(ui, |ui| {
+                        ui.vertical_centered(|ui| {
+                            qr_fits = theme::qr_code(ui, code, 260.0_f32.min(width));
+                            if !qr_fits {
+                                ui.label(RichText::new(tr!("qr-too-big")).color(theme::TEXT_SOFT));
+                            }
+                        });
+                        ui.add_space(6.0);
                         ui.add(
                             TextEdit::multiline(&mut code.as_str())
                                 .font(egui::TextStyle::Monospace)
+                                .desired_rows(3)
                                 .desired_width(f32::INFINITY),
                         );
                     });
                     ui.add_space(10.0);
-                    let copy_label = if *copied { tr!("copied") } else { tr!("copy") };
-                    let buttons = vec![(copy_label, theme::PURPLE, true), (tr!("close"), theme::GRAY, false)];
+                    let label = |kind, normal| if *copied == Some(kind) { tr!("copied") } else { normal };
+                    let mut buttons = vec![(label(Copied::Text, tr!("copy-text")), theme::PURPLE, Some(Copied::Text))];
+                    if qr_fits {
+                        buttons.push((label(Copied::Qr, tr!("copy-qr")), theme::BLUE, Some(Copied::Qr)));
+                    }
+                    buttons.push((tr!("close"), theme::GRAY, None));
                     match button_row(ui, buttons, false, 48.0) {
-                        Some(true) => {
+                        Some(Some(Copied::Text)) => {
                             ui.ctx().copy_text(code.clone());
-                            *copied = true;
+                            *copied = Some(Copied::Text);
                         }
-                        Some(false) => close = true,
+                        Some(Some(Copied::Qr)) => {
+                            if let Some(image) = theme::qr_image(code) {
+                                ui.ctx().copy_image(image);
+                            }
+                            *copied = Some(Copied::Qr);
+                        }
+                        Some(None) => close = true,
                         None => {}
                     }
                 }
-                ShareDialog::Import { code } => {
+                ShareDialog::Import { code, camera } => {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    let _ = camera;
                     #[cfg(target_arch = "wasm32")]
                     if let Some(text) = self.pasted.borrow_mut().take() {
                         *code = text;
@@ -496,8 +539,34 @@ impl VocadadaApp {
                         );
                     });
                     #[cfg(target_arch = "wasm32")]
-                    if ui.add(egui::Button::new(tr!("paste")).min_size(vec2(0.0, 36.0))).clicked() {
-                        self.request_paste(ui.ctx());
+                    {
+                        ui.horizontal_wrapped(|ui| {
+                            if ui.add(egui::Button::new(tr!("paste")).min_size(vec2(0.0, 36.0))).clicked() {
+                                self.request_paste(ui.ctx());
+                            }
+                            let scanning = camera.scanner.is_some();
+                            let label = if scanning { tr!("scan-stop") } else { tr!("scan-qr") };
+                            if ui.add(egui::Button::new(label).min_size(vec2(0.0, 36.0))).clicked() {
+                                camera.scanner = if scanning { None } else { crate::scanner::Scanner::start(ui.ctx()) };
+                                camera.failed = !scanning && camera.scanner.is_none();
+                            }
+                        });
+                        if let Some(scanner) = &mut camera.scanner {
+                            match scanner.show(ui, width) {
+                                crate::scanner::Scan::Found(text) => {
+                                    *code = text;
+                                    camera.scanner = None;
+                                }
+                                crate::scanner::Scan::Failed => {
+                                    camera.failed = true;
+                                    camera.scanner = None;
+                                }
+                                crate::scanner::Scan::Waiting => {}
+                            }
+                        }
+                        if camera.failed {
+                            ui.label(RichText::new(tr!("camera-error")).color(theme::RED));
+                        }
                     }
                     let decoded = (!code.trim().is_empty()).then(|| share::decode(code));
                     match &decoded {

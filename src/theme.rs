@@ -88,6 +88,48 @@ pub fn big_button(ui: &mut Ui, text: &str, fill: Color32, size: Vec2) -> Respons
     )
 }
 
+/// Paints `text` as a QR code at most `size` points wide. Returns false if the text is too long for a QR code.
+pub fn qr_code(ui: &mut Ui, text: &str, size: f32) -> bool {
+    let Ok(code) = qrcode::QrCode::with_error_correction_level(text, qrcode::EcLevel::L) else {
+        return false;
+    };
+    let n = code.width();
+    let quiet = 4;
+    // Whole pixels per module, so neighbouring modules don't leave faint seams.
+    let ppp = ui.ctx().pixels_per_point();
+    let module = (size * ppp / (n + 2 * quiet) as f32).floor().max(1.0) / ppp;
+    let side = module * (n + 2 * quiet) as f32;
+    let (rect, _) = ui.allocate_exact_size(vec2(side, side), Sense::hover());
+    let origin = (rect.min.to_vec2() * ppp).round() / ppp;
+    let painter = ui.painter();
+    painter.rect_filled(rect, 0, Color32::WHITE);
+    for (i, color) in code.to_colors().into_iter().enumerate() {
+        if color == qrcode::Color::Dark {
+            let pos = vec2((i % n + quiet) as f32, (i / n + quiet) as f32) * module;
+            painter.rect_filled(Rect::from_min_size((origin + pos).to_pos2(), Vec2::splat(module)), 0, Color32::BLACK);
+        }
+    }
+    true
+}
+
+/// `text` as a QR code picture (black on white, with the usual blank border), e.g. for the clipboard.
+pub fn qr_image(text: &str) -> Option<egui::ColorImage> {
+    let code = qrcode::QrCode::with_error_correction_level(text, qrcode::EcLevel::L).ok()?;
+    let (n, quiet, scale) = (code.width(), 4, 8);
+    let side = (n + 2 * quiet) * scale;
+    let colors = code.to_colors();
+    let mut image = egui::ColorImage::new([side, side], Color32::WHITE);
+    for y in 0..side {
+        for x in 0..side {
+            let (mx, my) = ((x / scale).wrapping_sub(quiet), (y / scale).wrapping_sub(quiet));
+            if mx < n && my < n && colors[my * n + mx] == qrcode::Color::Dark {
+                image.pixels[y * side + x] = Color32::BLACK;
+            }
+        }
+    }
+    Some(image)
+}
+
 pub fn tab_button(ui: &mut Ui, text: &str, color: Color32, active: bool, size: Vec2, font_size: f32) -> Response {
     let (fill, text_color) = if active {
         (color, Color32::WHITE)
