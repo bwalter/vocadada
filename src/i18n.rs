@@ -38,17 +38,87 @@ pub(crate) use tr;
 pub enum Language {
     English,
     German,
+    Bavarian,
     French,
+    Spanish,
+    Portuguese,
+    Italian,
+    Dutch,
+    Danish,
+    Norwegian,
+    Swedish,
+    Finnish,
+    Icelandic,
+    Polish,
+    Czech,
+    Slovak,
+    Hungarian,
+    Croatian,
+    Romanian,
+    Albanian,
+    Greek,
+    Russian,
+    Ukrainian,
+    Latin,
+    AncientGreek,
 }
 
 impl Language {
-    pub const ALL: [Self; 3] = [Self::English, Self::German, Self::French];
+    pub const ALL: [Self; 25] = [
+        Self::English,
+        Self::German,
+        Self::Bavarian,
+        Self::French,
+        Self::Spanish,
+        Self::Portuguese,
+        Self::Italian,
+        Self::Dutch,
+        Self::Danish,
+        Self::Norwegian,
+        Self::Swedish,
+        Self::Finnish,
+        Self::Icelandic,
+        Self::Polish,
+        Self::Czech,
+        Self::Slovak,
+        Self::Hungarian,
+        Self::Croatian,
+        Self::Romanian,
+        Self::Albanian,
+        Self::Greek,
+        Self::Russian,
+        Self::Ukrainian,
+        Self::Latin,
+        Self::AncientGreek,
+    ];
 
     pub fn code(self) -> &'static str {
         match self {
             Self::English => "en",
             Self::German => "de",
+            Self::Bavarian => "bar",
             Self::French => "fr",
+            Self::Spanish => "es",
+            Self::Portuguese => "pt",
+            Self::Italian => "it",
+            Self::Dutch => "nl",
+            Self::Danish => "da",
+            Self::Norwegian => "nb",
+            Self::Swedish => "sv",
+            Self::Finnish => "fi",
+            Self::Icelandic => "is",
+            Self::Polish => "pl",
+            Self::Czech => "cs",
+            Self::Slovak => "sk",
+            Self::Hungarian => "hu",
+            Self::Croatian => "hr",
+            Self::Romanian => "ro",
+            Self::Albanian => "sq",
+            Self::Greek => "el",
+            Self::Russian => "ru",
+            Self::Ukrainian => "uk",
+            Self::Latin => "la",
+            Self::AncientGreek => "grc",
         }
     }
 
@@ -57,11 +127,35 @@ impl Language {
         match self {
             Self::English => "English",
             Self::German => "Deutsch",
+            Self::Bavarian => "Boarisch",
             Self::French => "Français",
+            Self::Spanish => "Español",
+            Self::Portuguese => "Português",
+            Self::Italian => "Italiano",
+            Self::Dutch => "Nederlands",
+            Self::Danish => "Dansk",
+            Self::Norwegian => "Norsk",
+            Self::Swedish => "Svenska",
+            Self::Finnish => "Suomi",
+            Self::Icelandic => "Íslenska",
+            Self::Polish => "Polski",
+            Self::Czech => "Čeština",
+            Self::Slovak => "Slovenčina",
+            Self::Hungarian => "Magyar",
+            Self::Croatian => "Hrvatski",
+            Self::Romanian => "Română",
+            Self::Albanian => "Shqip",
+            Self::Greek => "Ελληνικά",
+            Self::Russian => "Русский",
+            Self::Ukrainian => "Українська",
+            Self::Latin => "Latina",
+            Self::AncientGreek => "Ἑλληνικὴ ἀρχαία",
         }
     }
 
     pub fn from_code(code: &str) -> Option<Self> {
+        // Systems report Norwegian as "no", "nb" or "nn"; there is one (Bokmål) translation.
+        let code = if matches!(code, "no" | "nn") { "nb" } else { code };
         Self::ALL.into_iter().find(|l| l.code() == code)
     }
 }
@@ -133,6 +227,31 @@ mod tests {
         assert_eq!(tr!("mistakes-count", count = 0), "Gar keine Fehler!");
         assert_eq!(tr!("word-count", count = 1), "1 Wort");
         assert_eq!(tr!("word-count", count = 3), "3 Wörter");
+        set(Language::Latin);
+        assert_eq!(tr!("word-count", count = 1), "1 verbum");
+        assert_eq!(tr!("word-count", count = 2), "2 verba");
+        set(Language::Icelandic);
+        assert_eq!(tr!("mistakes-count", count = 21), "21 villa");
+        assert_eq!(tr!("mistakes-count", count = 11), "11 villur");
+        set(Language::Bavarian);
+        assert_eq!(tr!("word-count", count = 3), "3 Wörter");
+        set(Language::Spanish);
+        assert_eq!(tr!("word-count", count = 1), "1 palabra");
+        set(Language::Russian);
+        assert_eq!(tr!("word-count", count = 21), "21 слово");
+        assert_eq!(tr!("word-count", count = 3), "3 слова");
+        assert_eq!(tr!("word-count", count = 5), "5 слов");
+        set(Language::Czech);
+        assert_eq!(tr!("mistakes-count", count = 4), "4 chyby");
+        assert_eq!(tr!("mistakes-count", count = 5), "5 chyb");
+        set(Language::Polish);
+        assert_eq!(tr!("word-count", count = 22), "22 słowa");
+        assert_eq!(tr!("word-count", count = 12), "12 słów");
+        set(Language::Romanian);
+        assert_eq!(tr!("word-count", count = 3), "3 cuvinte");
+        assert_eq!(tr!("word-count", count = 20), "20 de cuvinte");
+        set(Language::AncientGreek);
+        assert_eq!(tr!("word-count", count = 2), "2 λέξεις");
         set(Language::English);
         assert_eq!(tr!("delete-body", name = "Zoo"), "\"Zoo\" and all its words will be gone forever.");
     }

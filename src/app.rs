@@ -302,15 +302,18 @@ impl VocadadaApp {
         if response.clicked() {
             ui.memory_mut(|m| m.toggle_popup(popup_id));
         }
+        let max_height = (ui.ctx().screen_rect().bottom() - response.rect.bottom() - 30.0).max(120.0);
         egui::popup_below_widget(ui, popup_id, &response, egui::PopupCloseBehavior::CloseOnClick, |ui| {
-            ui.set_min_width(170.0);
-            for language in Language::ALL {
-                if theme::language_row(ui, language, language == current).clicked() {
-                    i18n::set(language);
-                    self.library.language = Some(language.code().to_string());
-                    self.dirty = true;
+            ui.set_min_width(220.0);
+            ScrollArea::vertical().max_height(max_height).show(ui, |ui| {
+                for language in Language::ALL {
+                    if theme::language_row(ui, language, language == current).clicked() {
+                        i18n::set(language);
+                        self.library.language = Some(language.code().to_string());
+                        self.dirty = true;
+                    }
                 }
-            }
+            });
         });
     }
 

@@ -172,6 +172,20 @@ pub fn paint_flag(painter: &Painter, rect: Rect, language: Language) {
             painter.rect_filled(stripe, 0, color);
         }
     };
+    // Cross centered at `x` (fraction of the width); arms are drawn widest first, widths as fractions of the height.
+    let nordic_cross = |background: Color32, x: f32, arms: &[(f32, Color32)]| {
+        painter.rect_filled(rect, 0, background);
+        let center = pos2(rect.left() + rect.width() * x, rect.center().y);
+        for &(width, color) in arms {
+            let width = width * rect.height();
+            painter.rect_filled(Rect::from_center_size(center, vec2(width, rect.height())), 0, color);
+            painter.rect_filled(
+                Rect::from_x_y_ranges(rect.x_range(), center.y - width / 2.0..=center.y + width / 2.0),
+                0,
+                color,
+            );
+        }
+    };
     match language {
         Language::German => stripes(
             [Color32::BLACK, Color32::from_rgb(221, 0, 0), Color32::from_rgb(255, 206, 0)],
@@ -181,6 +195,180 @@ pub fn paint_flag(painter: &Painter, rect: Rect, language: Language) {
             [Color32::from_rgb(0, 85, 164), Color32::WHITE, Color32::from_rgb(239, 65, 53)],
             true,
         ),
+        Language::Dutch => stripes(
+            [Color32::from_rgb(174, 28, 40), Color32::WHITE, Color32::from_rgb(33, 70, 139)],
+            false,
+        ),
+        Language::Hungarian => stripes(
+            [Color32::from_rgb(205, 42, 62), Color32::WHITE, Color32::from_rgb(67, 111, 77)],
+            false,
+        ),
+        Language::Russian => stripes(
+            [Color32::WHITE, Color32::from_rgb(0, 57, 166), Color32::from_rgb(213, 43, 30)],
+            false,
+        ),
+        Language::Slovak => {
+            stripes([Color32::WHITE, Color32::from_rgb(11, 78, 162), Color32::from_rgb(238, 28, 37)], false);
+            // Simplified coat of arms (red shield, white double cross), so it doesn't look like Russia's flag.
+            let (w, h) = (rect.height() * 0.42, rect.height() * 0.6);
+            let top_left = pos2(rect.left() + rect.width() * 0.34 - w / 2.0, rect.center().y - h / 2.0);
+            let shield = vec![
+                top_left,
+                top_left + vec2(w, 0.0),
+                top_left + vec2(w, h * 0.6),
+                top_left + vec2(w / 2.0, h),
+                top_left + vec2(0.0, h * 0.6),
+            ];
+            painter.add(Shape::convex_polygon(shield, Color32::from_rgb(238, 28, 37), Stroke::new(1.0_f32, Color32::WHITE)));
+            let cx = top_left.x + w / 2.0;
+            let bar = (h * 0.1).max(1.0);
+            painter.rect_filled(Rect::from_center_size(pos2(cx, top_left.y + h * 0.45), vec2(bar, h * 0.65)), 0, Color32::WHITE);
+            for (y, width) in [(0.3, 0.5), (0.5, 0.7)] {
+                let center = pos2(cx, top_left.y + h * y);
+                painter.rect_filled(Rect::from_center_size(center, vec2(w * width, bar)), 0, Color32::WHITE);
+            }
+        }
+        Language::Ukrainian => {
+            painter.rect_filled(rect, 0, Color32::from_rgb(255, 215, 0));
+            let top = Rect::from_min_size(rect.min, vec2(rect.width(), rect.height() / 2.0));
+            painter.rect_filled(top, 0, Color32::from_rgb(0, 87, 183));
+        }
+        Language::Czech => {
+            painter.rect_filled(rect, 0, Color32::from_rgb(215, 20, 26));
+            let top = Rect::from_min_size(rect.min, vec2(rect.width(), rect.height() / 2.0));
+            painter.rect_filled(top, 0, Color32::WHITE);
+            let wedge = vec![rect.left_top(), pos2(rect.center().x, rect.center().y), rect.left_bottom()];
+            painter.add(Shape::convex_polygon(wedge, Color32::from_rgb(17, 69, 126), Stroke::NONE));
+        }
+        Language::Portuguese => {
+            // Green and red with a simplified armillary sphere (yellow ring) on the border.
+            painter.rect_filled(rect, 0, Color32::from_rgb(255, 0, 0));
+            let green = Rect::from_min_size(rect.min, vec2(rect.width() * 0.4, rect.height()));
+            painter.rect_filled(green, 0, Color32::from_rgb(0, 102, 0));
+            let center = pos2(green.right(), rect.center().y);
+            painter.circle_filled(center, rect.height() * 0.27, Color32::from_rgb(255, 225, 0));
+            painter.circle_filled(center, rect.height() * 0.15, Color32::WHITE);
+        }
+        Language::Spanish => {
+            // Red, yellow (twice as high), red; without the coat of arms.
+            painter.rect_filled(rect, 0, Color32::from_rgb(170, 21, 27));
+            let yellow = Rect::from_center_size(rect.center(), vec2(rect.width(), rect.height() / 2.0));
+            painter.rect_filled(yellow, 0, Color32::from_rgb(241, 191, 0));
+        }
+        Language::Bavarian => {
+            // White and blue lozenges: blue diamonds on white, the gaps between them form the white ones.
+            painter.rect_filled(rect, 0, Color32::WHITE);
+            let blue = Color32::from_rgb(0, 152, 212);
+            let (dx, dy) = (rect.width() / 5.0, rect.height() / 3.0);
+            for row in 0..=3 {
+                for col in 0..=5 {
+                    let c = rect.left_top() + vec2(col as f32 * dx, row as f32 * dy);
+                    let diamond = vec![
+                        c + vec2(0.0, -dy / 2.0),
+                        c + vec2(dx / 2.0, 0.0),
+                        c + vec2(0.0, dy / 2.0),
+                        c + vec2(-dx / 2.0, 0.0),
+                    ];
+                    painter.add(Shape::convex_polygon(diamond, blue, Stroke::NONE));
+                }
+            }
+        }
+        Language::Icelandic => nordic_cross(
+            Color32::from_rgb(2, 82, 156),
+            9.0 / 25.0,
+            &[(4.0 / 18.0, Color32::WHITE), (2.0 / 18.0, Color32::from_rgb(220, 30, 53))],
+        ),
+        Language::Norwegian => nordic_cross(
+            Color32::from_rgb(186, 12, 47),
+            8.0 / 22.0,
+            &[(4.0 / 16.0, Color32::WHITE), (2.0 / 16.0, Color32::from_rgb(0, 32, 91))],
+        ),
+        Language::Swedish => nordic_cross(
+            Color32::from_rgb(0, 106, 167),
+            6.0 / 16.0,
+            &[(2.0 / 10.0, Color32::from_rgb(254, 204, 0))],
+        ),
+        Language::Danish => nordic_cross(Color32::from_rgb(200, 16, 46), 14.0 / 37.0, &[(4.0 / 28.0, Color32::WHITE)]),
+        Language::Finnish => nordic_cross(Color32::WHITE, 6.5 / 18.0, &[(3.0 / 11.0, Color32::from_rgb(0, 47, 108))]),
+        Language::Polish => {
+            painter.rect_filled(rect, 0, Color32::from_rgb(220, 20, 60));
+            painter.rect_filled(Rect::from_min_size(rect.min, vec2(rect.width(), rect.height() / 2.0)), 0, Color32::WHITE);
+        }
+        Language::Italian => stripes(
+            [Color32::from_rgb(0, 146, 70), Color32::WHITE, Color32::from_rgb(206, 43, 55)],
+            true,
+        ),
+        Language::Romanian => stripes(
+            [Color32::from_rgb(0, 43, 127), Color32::from_rgb(252, 209, 22), Color32::from_rgb(206, 17, 38)],
+            true,
+        ),
+        Language::Croatian => {
+            let red = Color32::from_rgb(255, 0, 0);
+            stripes([red, Color32::WHITE, Color32::from_rgb(23, 23, 150)], false);
+            // Simplified coat of arms: red and white checkerboard.
+            let n = 5;
+            let cell = rect.height() * 0.5 / n as f32;
+            let top_left = rect.center() - vec2(cell * n as f32 / 2.0, cell * n as f32 / 2.0);
+            for row in 0..n {
+                for col in 0..n {
+                    let color = if (row + col) % 2 == 0 { red } else { Color32::WHITE };
+                    let min = top_left + vec2(col as f32 * cell, row as f32 * cell);
+                    painter.rect_filled(Rect::from_min_size(min, Vec2::splat(cell)), 0, color);
+                }
+            }
+        }
+        Language::Greek => {
+            let blue = Color32::from_rgb(13, 94, 175);
+            let stripe = rect.height() / 9.0;
+            for i in 0..9 {
+                let color = if i % 2 == 0 { blue } else { Color32::WHITE };
+                let min = rect.left_top() + vec2(0.0, i as f32 * stripe);
+                painter.rect_filled(Rect::from_min_size(min, vec2(rect.width(), stripe)), 0, color);
+            }
+            let canton = Rect::from_min_size(rect.min, Vec2::splat(5.0 * stripe));
+            painter.rect_filled(canton, 0, blue);
+            painter.rect_filled(Rect::from_center_size(canton.center(), vec2(canton.width(), stripe)), 0, Color32::WHITE);
+            painter.rect_filled(Rect::from_center_size(canton.center(), vec2(stripe, canton.height())), 0, Color32::WHITE);
+        }
+        Language::AncientGreek => {
+            // No country; black letters on terracotta, like an ancient vase.
+            painter.rect_filled(rect, 0, Color32::from_rgb(196, 98, 45));
+            painter.text(
+                rect.center(),
+                Align2::CENTER_CENTER,
+                "ΑΒΓ",
+                FontId::proportional(rect.height() * 0.55),
+                Color32::BLACK,
+            );
+        }
+        Language::Albanian => {
+            // Red with a simplified black double-headed eagle.
+            painter.rect_filled(rect, 0, Color32::from_rgb(228, 30, 32));
+            let (c, h) = (rect.center(), rect.height());
+            for side in [-1.0, 1.0] {
+                let wing = vec![
+                    c + vec2(0.0, -h * 0.05),
+                    c + vec2(side * h * 0.38, -h * 0.3),
+                    c + vec2(side * h * 0.3, h * 0.05),
+                    c + vec2(0.0, h * 0.15),
+                ];
+                painter.add(Shape::convex_polygon(wing, Color32::BLACK, Stroke::NONE));
+                painter.circle_filled(c + vec2(side * h * 0.08, -h * 0.28), h * 0.07, Color32::BLACK);
+            }
+            let body = vec![c + vec2(-h * 0.08, -h * 0.2), c + vec2(h * 0.08, -h * 0.2), c + vec2(0.0, h * 0.38)];
+            painter.add(Shape::convex_polygon(body, Color32::BLACK, Stroke::NONE));
+        }
+        Language::Latin => {
+            // Latin has no country; a Roman banner with "SPQR" instead.
+            painter.rect_filled(rect, 0, Color32::from_rgb(140, 20, 30));
+            painter.text(
+                rect.center(),
+                Align2::CENTER_CENTER,
+                "SPQR",
+                FontId::proportional(rect.height() * 0.45),
+                Color32::from_rgb(240, 190, 50),
+            );
+        }
         Language::English => {
             // Simplified Union Jack.
             let red = Color32::from_rgb(200, 16, 46);
