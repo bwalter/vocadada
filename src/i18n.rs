@@ -5,7 +5,7 @@ use rust_embed::RustEmbed;
 use std::sync::LazyLock;
 
 #[derive(RustEmbed)]
-#[folder = "i18n/"]
+#[folder = "i18n/generated/"]
 struct Localizations;
 
 pub static LOADER: LazyLock<FluentLanguageLoader> = LazyLock::new(|| {
@@ -23,7 +23,7 @@ fn disable_isolation(loader: &FluentLanguageLoader) {
     loader.set_use_isolating(false);
 }
 
-/// Translated message. The id and argument names are checked against `i18n/en` at compile time.
+/// Translated message (texts are in `i18n/vocadada.ftl`). The id and argument names are checked at compile time.
 macro_rules! tr {
     ($id:literal) => {
         i18n_embed_fl::fl!($crate::i18n::LOADER, $id)
