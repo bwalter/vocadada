@@ -429,6 +429,19 @@ pub fn paint_flag(painter: &Painter, rect: Rect, language: Language) {
     painter.rect_stroke(rect, 0, Stroke::new(1.0_f32, Color32::from_black_alpha(50)), StrokeKind::Inside);
 }
 
+/// The app logo (same design as web/icons/icon.svg): a white tile with a purple "V" and a star.
+pub fn paint_logo(painter: &Painter, rect: Rect) {
+    let s = rect.width() / 512.0;
+    let at = |x: f32, y: f32| rect.min + vec2(x, y) * s;
+    painter.rect_filled(rect, CornerRadius::same((rect.width() * 0.2) as u8), PURPLE);
+    painter.rect_filled(Rect::from_min_size(at(116.0, 116.0), Vec2::splat(280.0 * s)), CornerRadius::same((56.0 * s) as u8), Color32::WHITE);
+    // Drawn as strokes: egui's fonts have no bold weight for a "V" this heavy.
+    let v = vec![at(178.0, 186.0), at(256.0, 330.0), at(334.0, 186.0)];
+    painter.add(Shape::line(v, Stroke::new(52.0 * s, PURPLE)));
+    paint_star(painter, at(352.0, 160.0), 52.0 * s, Color32::WHITE);
+    paint_star(painter, at(352.0, 160.0), 44.0 * s, Color32::from_rgb(255, 193, 7));
+}
+
 /// Small round badge with a down arrow, to mark a button that opens a dropdown.
 pub fn paint_dropdown_badge(painter: &Painter, center: Pos2) {
     painter.circle(center, 7.5, Color32::WHITE, Stroke::new(1.5_f32, PURPLE));

@@ -14,6 +14,11 @@ const GENERATED: &str = "i18n/generated";
 const REFERENCE: &str = "en";
 
 fn main() {
+    // Shown in the About dialog: the GitHub Actions run number, or LOCAL for builds elsewhere.
+    println!("cargo:rerun-if-env-changed=GITHUB_RUN_NUMBER");
+    let version = std::env::var("GITHUB_RUN_NUMBER").unwrap_or_else(|_| "LOCAL".into());
+    println!("cargo:rustc-env=VOCADADA_VERSION={version}");
+
     println!("cargo:rerun-if-changed={SOURCE}");
     // Also regenerate if the output was deleted (e.g. a fresh checkout or a manual clean-up).
     println!("cargo:rerun-if-changed={GENERATED}/{REFERENCE}/vocadada.ftl");

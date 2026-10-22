@@ -29,6 +29,8 @@ fn tabs() -> [(Mode, String, Color32); 3] {
 /// Below this screen width (in points) the phone layout is used.
 const NARROW_WIDTH: f32 = 700.0;
 
+const REPOSITORY_URL: &str = "https://github.com/bwalter/vocadada";
+
 /// Widgets that should grab keyboard focus on the next frame they are shown.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Focus {
@@ -95,6 +97,7 @@ pub struct VocadadaApp {
     new_project_name: Option<String>,
     rename_text: Option<String>,
     confirm_delete: bool,
+    show_about: bool,
     share_dialog: Option<ShareDialog>,
     /// Text read from the browser clipboard, filled in asynchronously.
     #[cfg(target_arch = "wasm32")]
@@ -235,6 +238,7 @@ impl VocadadaApp {
             new_project_name: None,
             rename_text: None,
             confirm_delete: false,
+            show_about: false,
             share_dialog: None,
             #[cfg(target_arch = "wasm32")]
             pasted: Default::default(),
@@ -337,7 +341,21 @@ impl VocadadaApp {
                 let center = egui::pos2(right - flag_size.x / 2.0, title.rect.center().y);
                 self.language_menu(ui, egui::Rect::from_center_size(center, flag_size));
             });
-            ui.label(RichText::new(tr!("app-tagline")).color(theme::TEXT_SOFT));
+            ui.horizontal(|ui| {
+                let button_size = 26.0;
+                let text_width = ui.available_width() - button_size - ui.spacing().item_spacing.x;
+                ui.allocate_ui(vec2(text_width, 0.0), |ui| {
+                    ui.add(egui::Label::new(RichText::new(tr!("app-tagline")).color(theme::TEXT_SOFT)).wrap());
+                });
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    let info = egui::Button::new(RichText::new("i").size(16.0).strong().italics().color(theme::PURPLE))
+                        .corner_radius(13)
+                        .min_size(vec2(button_size, button_size));
+                    if ui.add(info).on_hover_text(tr!("about")).clicked() {
+                        self.show_about = true;
+                    }
+                });
+            });
             ui.add_space(4.0);
             ui.separator();
             ui.label(RichText::new(tr!("my-projects")).size(22.0).strong());
@@ -647,6 +665,30 @@ impl VocadadaApp {
         }
         if !close && !modal.should_close() {
             self.share_dialog = Some(dialog);
+        }
+    }
+
+    fn about_dialog(&mut self, ctx: &egui::Context) {
+        if !self.show_about {
+            return;
+        }
+        let mut close = false;
+        let modal = egui::Modal::new(egui::Id::new("about")).show(ctx, |ui| {
+            ui.set_width(340.0_f32.min(ctx.screen_rect().width() - 64.0));
+            ui.vertical_centered(|ui| {
+                let (logo, _) = ui.allocate_exact_size(vec2(96.0, 96.0), Sense::hover());
+                theme::paint_logo(ui.painter(), logo);
+                ui.label(RichText::new("Vocadada").size(36.0).strong().color(theme::PURPLE));
+                ui.label(RichText::new(tr!("app-tagline")).color(theme::TEXT_SOFT));
+                ui.add_space(8.0);
+                ui.label(tr!("about-version", version = env!("VOCADADA_VERSION")));
+                ui.hyperlink_to(tr!("about-source"), REPOSITORY_URL);
+                ui.add_space(12.0);
+                close = big_button(ui, &tr!("close"), theme::PURPLE, vec2(160.0, 44.0)).clicked();
+            });
+        });
+        if close || modal.should_close() {
+            self.show_about = false;
         }
     }
 
@@ -1382,6 +1424,7 @@ impl eframe::App for VocadadaApp {
         }
 
         self.delete_dialog(ctx);
+        self.about_dialog(ctx);
         self.share_dialog(ctx);
         self.confetti.show(ctx);
 
