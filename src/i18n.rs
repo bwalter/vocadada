@@ -23,8 +23,17 @@ fn disable_isolation(loader: &FluentLanguageLoader) {
     loader.set_use_isolating(false);
 }
 
-/// Translated message (texts are in `i18n/vocadada.ftl`). The id and argument names are checked at compile time.
+/// Translated message for display (texts are in `i18n/vocadada.ftl`). The id and argument names are checked
+/// at compile time. Right-to-left text is already shaped and reordered, see [`visual`].
 macro_rules! tr {
+    ($($args:tt)+) => {
+        $crate::i18n::visual(&$crate::i18n::tr_raw!($($args)+)).into_owned()
+    };
+}
+pub(crate) use tr;
+
+/// Translated message in logical order, for text that is stored rather than shown (e.g. default names).
+macro_rules! tr_raw {
     ($id:literal) => {
         i18n_embed_fl::fl!($crate::i18n::LOADER, $id)
     };
@@ -32,7 +41,32 @@ macro_rules! tr {
         i18n_embed_fl::fl!($crate::i18n::LOADER, $id, $($args),+)
     };
 }
-pub(crate) use tr;
+pub(crate) use tr_raw;
+
+fn is_rtl(c: char) -> bool {
+    matches!(c as u32, 0x0590..=0x08FF | 0xFB1D..=0xFDFF | 0xFE70..=0xFEFF)
+}
+
+/// Text as egui should draw it. egui lays out text left to right and can't join Arabic letters, so
+/// right-to-left lines get their letters replaced by the joined forms and are put in visual order.
+/// Line breaks from wrapping long text happen afterwards, so wrapped right-to-left lines are in reverse order.
+pub fn visual(text: &str) -> std::borrow::Cow<'_, str> {
+    if !text.chars().any(is_rtl) {
+        return text.into();
+    }
+    let lines: Vec<String> = text
+        .split('\n')
+        .map(|line| {
+            let shaped = ar_reshaper::reshape_line(line);
+            let bidi = unicode_bidi::BidiInfo::new(&shaped, None);
+            match bidi.paragraphs.first() {
+                Some(paragraph) => bidi.reorder_line(paragraph, paragraph.range.clone()).into_owned(),
+                None => shaped,
+            }
+        })
+        .collect();
+    lines.join("\n").into()
+}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Language {
@@ -59,12 +93,16 @@ pub enum Language {
     Greek,
     Russian,
     Ukrainian,
+    Arabic,
+    Chinese,
+    Japanese,
+    Korean,
     Latin,
     AncientGreek,
 }
 
 impl Language {
-    pub const ALL: [Self; 25] = [
+    pub const ALL: [Self; 29] = [
         Self::English,
         Self::German,
         Self::Bavarian,
@@ -88,6 +126,10 @@ impl Language {
         Self::Greek,
         Self::Russian,
         Self::Ukrainian,
+        Self::Arabic,
+        Self::Chinese,
+        Self::Japanese,
+        Self::Korean,
         Self::Latin,
         Self::AncientGreek,
     ];
@@ -117,6 +159,10 @@ impl Language {
             Self::Greek => "el",
             Self::Russian => "ru",
             Self::Ukrainian => "uk",
+            Self::Arabic => "ar",
+            Self::Chinese => "zh",
+            Self::Japanese => "ja",
+            Self::Korean => "ko",
             Self::Latin => "la",
             Self::AncientGreek => "grc",
         }
@@ -148,6 +194,10 @@ impl Language {
             Self::Greek => "Ελληνικά",
             Self::Russian => "Русский",
             Self::Ukrainian => "Українська",
+            Self::Arabic => "العربية",
+            Self::Chinese => "简体中文",
+            Self::Japanese => "日本語",
+            Self::Korean => "한국어",
             Self::Latin => "Latina",
             Self::AncientGreek => "Ἑλληνικὴ ἀρχαία",
         }
@@ -181,9 +231,17 @@ pub fn set_from_system() {
     let requested = i18n_embed::WebLanguageRequester::requested_languages();
     let language = requested
         .iter()
+        .filter(|id| !is_traditional_chinese(id))
         .find_map(|id| Language::from_code(id.language.as_str()))
         .unwrap_or(Language::English);
     set(language);
+}
+
+/// The Chinese translation uses simplified characters, which Traditional Chinese readers may not want by default.
+fn is_traditional_chinese(id: &LanguageIdentifier) -> bool {
+    id.language.as_str() == "zh"
+        && (id.script.is_some_and(|s| s.as_str() == "Hant")
+            || id.region.is_some_and(|r| matches!(r.as_str(), "TW" | "HK" | "MO")))
 }
 
 #[cfg(test)]
@@ -191,6 +249,9 @@ mod tests {
     use super::*;
     use fluent_syntax::{ast, parser};
     use std::collections::BTreeSet;
+
+    /// Tests that switch the (global) language must not run at the same time.
+    static LANGUAGE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
     fn message_ids(code: &str) -> BTreeSet<String> {
         let file = Localizations::get(&format!("{code}/vocadada.ftl")).expect("translation file exists");
@@ -222,7 +283,43 @@ mod tests {
     }
 
     #[test]
+    fn web_ui_fonts_cover_cjk_texts() {
+        use ab_glyph::Font as _;
+        for (code, font, name) in [
+            ("zh", "NotoSansSC", "简体中文"),
+            ("ja", "NotoSansJP", "日本語"),
+            ("ko", "NotoSansKR", "한국어"),
+        ] {
+            let path = format!("web/fonts/{font}-ui.otf");
+            let bytes = std::fs::read(&path).expect("font exists");
+            let font = ab_glyph::FontRef::try_from_slice(&bytes).expect("valid font");
+            let file = Localizations::get(&format!("{code}/vocadada.ftl")).expect("translation exists");
+            let text = std::str::from_utf8(&file.data).unwrap().to_string() + name;
+            let missing: BTreeSet<char> = text
+                .chars()
+                .filter(|&c| matches!(c as u32, 0x1100..=0x11FF | 0x3000..=0x9FFF | 0xAC00..=0xD7AF | 0xFF00..=0xFFEF))
+                .filter(|&c| font.glyph_id(c).0 == 0)
+                .collect();
+            assert!(missing.is_empty(), "{path} lacks {missing:?}; run ./make-ui-fonts.sh");
+        }
+    }
+
+    #[test]
+    fn arabic_is_shaped_and_reordered() {
+        let _language = LANGUAGE_LOCK.lock().unwrap();
+        set(Language::Arabic);
+        assert_eq!(tr_raw!("word-count", count = 3), "3 كلمات");
+        assert_eq!(tr_raw!("word-count", count = 11), "11 كلمة");
+        let shown = tr!("word-count", count = 3);
+        assert!(shown.ends_with('3'), "number comes last when read left to right: {shown}");
+        assert!(shown.chars().all(|c| !matches!(c as u32, 0x0600..=0x06FF)), "letters are in joined forms");
+        set(Language::English);
+        assert_eq!(visual("Hund"), "Hund");
+    }
+
+    #[test]
     fn plurals_and_arguments() {
+        let _language = LANGUAGE_LOCK.lock().unwrap();
         set(Language::German);
         assert_eq!(tr!("mistakes-count", count = 0), "Gar keine Fehler!");
         assert_eq!(tr!("word-count", count = 1), "1 Wort");

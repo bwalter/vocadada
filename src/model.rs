@@ -1,4 +1,4 @@
-use crate::i18n::tr;
+use crate::i18n::{tr, tr_raw};
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io::ErrorKind, path::PathBuf};
@@ -35,8 +35,8 @@ impl Project {
     pub fn new(name: String) -> Self {
         Self {
             name,
-            lang1: tr!("default-language-1"),
-            lang2: tr!("default-language-2"),
+            lang1: tr_raw!("default-language-1"),
+            lang2: tr_raw!("default-language-2"),
             entries: Vec::new(),
         }
     }
@@ -48,6 +48,18 @@ pub struct Library {
     /// UI language code chosen by the user; `None` follows the system language.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
+}
+
+impl Library {
+    /// All text the user entered: project names, language names, words and examples.
+    pub fn texts(&self) -> impl Iterator<Item = &str> {
+        self.projects.iter().flat_map(|p| {
+            [&p.name, &p.lang1, &p.lang2]
+                .into_iter()
+                .chain(p.entries.iter().flat_map(|e| [&e.word1, &e.word2, &e.example]))
+                .map(String::as_str)
+        })
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -358,6 +358,48 @@ pub fn paint_flag(painter: &Painter, rect: Rect, language: Language) {
             let body = vec![c + vec2(-h * 0.08, -h * 0.2), c + vec2(h * 0.08, -h * 0.2), c + vec2(0.0, h * 0.38)];
             painter.add(Shape::convex_polygon(body, Color32::BLACK, Stroke::NONE));
         }
+        Language::Chinese => {
+            painter.rect_filled(rect, 0, Color32::from_rgb(238, 28, 37));
+            let yellow = Color32::from_rgb(255, 222, 0);
+            // Positions on the official 30x20 grid.
+            let at = |x: f32, y: f32| rect.left_top() + vec2(x / 30.0 * rect.width(), y / 20.0 * rect.height());
+            paint_star(&painter, at(5.0, 5.0), rect.height() * 0.15, yellow);
+            for (x, y) in [(10.0, 2.0), (12.0, 4.0), (12.0, 7.0), (10.0, 9.0)] {
+                paint_star(&painter, at(x, y), rect.height() * 0.05, yellow);
+            }
+        }
+        Language::Japanese => {
+            painter.rect_filled(rect, 0, Color32::WHITE);
+            painter.circle_filled(rect.center(), rect.height() * 0.3, Color32::from_rgb(188, 0, 45));
+        }
+        Language::Korean => {
+            painter.rect_filled(rect, 0, Color32::WHITE);
+            let (c, h) = (rect.center(), rect.height());
+            // Simplified taegeuk: red over blue, then the four trigrams as black bars on the diagonals.
+            let top = Rect::from_min_max(rect.min, pos2(rect.right(), c.y));
+            painter.with_clip_rect(top).circle_filled(c, h * 0.25, Color32::from_rgb(205, 46, 58));
+            let bottom = Rect::from_min_max(pos2(rect.left(), c.y), rect.max);
+            painter.with_clip_rect(bottom).circle_filled(c, h * 0.25, Color32::from_rgb(0, 71, 160));
+            for dir in [vec2(1.0, 1.0), vec2(-1.0, 1.0), vec2(1.0, -1.0), vec2(-1.0, -1.0)] {
+                let dir = dir.normalized();
+                let across = vec2(-dir.y, dir.x) * h * 0.08;
+                for i in 0..3 {
+                    let center = c + dir * (h * 0.36 + i as f32 * h * 0.055);
+                    painter.line_segment([center - across, center + across], Stroke::new(h * 0.035, Color32::BLACK));
+                }
+            }
+        }
+        Language::Arabic => {
+            // Arabic is spoken in many countries; the letter ʿayn (ع) of عربي on green instead of a flag.
+            painter.rect_filled(rect, 0, Color32::from_rgb(0, 122, 61));
+            painter.text(
+                rect.center(),
+                Align2::CENTER_CENTER,
+                "ع",
+                FontId::proportional(rect.height() * 0.75),
+                Color32::WHITE,
+            );
+        }
         Language::Latin => {
             // Latin has no country; a Roman banner with "SPQR" instead.
             painter.rect_filled(rect, 0, Color32::from_rgb(140, 20, 30));
@@ -412,7 +454,7 @@ pub fn language_row(ui: &mut Ui, language: Language, selected: bool) -> Response
     painter.text(
         pos2(flag.right() + 12.0, rect.center().y),
         Align2::LEFT_CENTER,
-        language.native_name(),
+        crate::i18n::visual(language.native_name()),
         FontId::proportional(20.0),
         TEXT,
     );

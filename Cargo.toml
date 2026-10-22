@@ -18,6 +18,8 @@ i18n-embed-fl = "0.10"
 rust-embed = { version = "8", features = ["debug-embed"] }
 qrcode = { version = "0.14.1", default-features = false }
 rqrr = "0.11"
+ar-reshaper = "1.5.0"
+unicode-bidi = "0.3.18"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 dirs = "5"
@@ -40,4 +42,5 @@ js-sys = "0.3"
 fluent-syntax = "0.12"
 
 [dev-dependencies]
+ab_glyph = "0.2"
 fluent-syntax = "0.12"

@@ -29,6 +29,10 @@ app-tagline =
     .uk = Вивчай слова весело!
     .la = Disce verba ludendo!
     .grc = Μάνθανε τὰς λέξεις παίζων!
+    .zh = 快乐学单词！
+    .ko = 재미있게 단어를 배워요!
+    .ja = 楽しく単語をおぼえよう！
+    .ar = تعلم الكلمات بمتعة!
 
 language =
     .en = Language
@@ -56,6 +60,10 @@ language =
     .uk = Мова
     .la = Lingua
     .grc = Γλῶττα
+    .zh = 语言
+    .ko = 언어
+    .ja = 言語
+    .ar = اللغة
 
 my-projects =
     .en = 📚 My projects
@@ -83,6 +91,10 @@ my-projects =
     .uk = 📚 Мої проєкти
     .la = 📚 Opera mea
     .grc = 📚 Τὰ ἐμὰ ἔργα
+    .zh = 📚 我的单词本
+    .ko = 📚 내 단어장
+    .ja = 📚 わたしの単語帳
+    .ar = 📚 مشاريعي
 
 no-projects =
     .en = No projects yet.
@@ -110,6 +122,10 @@ no-projects =
     .uk = Поки що немає проєктів.
     .la = Nondum ulla opera.
     .grc = Οὐδὲν ἔργον ἔτι.
+    .zh = 还没有单词本。
+    .ko = 아직 단어장이 없어요.
+    .ja = まだ単語帳がありません。
+    .ar = لا توجد مشاريع بعد.
 
 word-count =
     .en =
@@ -249,6 +265,18 @@ word-count =
             [one] { $count } λέξις
            *[other] { $count } λέξεις
         }
+    .zh = { $count } 个单词
+    .ko = 단어 { $count }개
+    .ja = { $count } 語
+    .ar =
+        { $count ->
+            [zero] لا كلمات
+            [one] كلمة واحدة
+            [two] كلمتان
+            [few] { $count } كلمات
+            [many] { $count } كلمة
+           *[other] { $count } كلمة
+        }
 
 new-project =
     .en = ➕ New project
@@ -276,6 +304,10 @@ new-project =
     .uk = ➕ Новий проєкт
     .la = ➕ Novum opus
     .grc = ➕ Νέον ἔργον
+    .zh = ➕ 新建单词本
+    .ko = ➕ 새 단어장
+    .ja = ➕ 新しい単語帳
+    .ar = ➕ مشروع جديد
 
 new-project-name-label =
     .en = Name of the new project:
@@ -303,6 +335,10 @@ new-project-name-label =
     .uk = Назва нового проєкту:
     .la = Nomen novi operis:
     .grc = Ὄνομα τοῦ νέου ἔργου:
+    .zh = 新单词本的名称：
+    .ko = 새 단어장 이름:
+    .ja = 新しい単語帳の名前：
+    .ar = اسم المشروع الجديد:
 
 new-project-name-hint =
     .en = e.g. Animals
@@ -330,6 +366,10 @@ new-project-name-hint =
     .uk = напр. Тварини
     .la = e.g. Animalia
     .grc = οἷον Ζῷα
+    .zh = 例如：动物
+    .ko = 예: 동물
+    .ja = 例：どうぶつ
+    .ar = مثلا: حيوانات
 
 create =
     .en = ✔ Create
@@ -357,6 +397,10 @@ create =
     .uk = ✔ Створити
     .la = ✔ Crea
     .grc = ✔ Ποίησον
+    .zh = ✔ 创建
+    .ko = ✔ 만들기
+    .ja = ✔ 作成
+    .ar = ✔ إنشاء
 
 cancel =
     .en = Cancel
@@ -384,6 +428,10 @@ cancel =
     .uk = Скасувати
     .la = Omitte
     .grc = Ἔασον
+    .zh = 取消
+    .ko = 취소
+    .ja = キャンセル
+    .ar = إلغاء
 
 rename =
     .en = ✏ Rename
@@ -411,6 +459,10 @@ rename =
     .uk = ✏ Перейменувати
     .la = ✏ Muta nomen
     .grc = ✏ Μετονόμασον
+    .zh = ✏ 重命名
+    .ko = ✏ 이름 바꾸기
+    .ja = ✏ 名前を変更
+    .ar = ✏ إعادة تسمية
 
 delete =
     .en = 🗑 Delete
@@ -438,6 +490,10 @@ delete =
     .uk = 🗑 Видалити
     .la = 🗑 Dele
     .grc = 🗑 Ἀπάλειψον
+    .zh = 🗑 删除
+    .ko = 🗑 삭제
+    .ja = 🗑 削除
+    .ar = 🗑 حذف
 
 ## Delete dialog
 
@@ -467,6 +523,10 @@ delete-title =
     .uk = Видалити цей проєкт?
     .la = Hoc opus delere vis?
     .grc = Ἆρ' ἀπαλείψεις τοῦτο τὸ ἔργον;
+    .zh = 删除这个单词本？
+    .ko = 이 단어장을 삭제할까요?
+    .ja = この単語帳を削除しますか？
+    .ar = هل تريد حذف هذا المشروع؟
 
 delete-body =
     .en = "{ $name }" and all its words will be gone forever.
@@ -494,6 +554,10 @@ delete-body =
     .uk = «{ $name }» і всі його слова зникнуть назавжди.
     .la = "{ $name }" et omnia eius verba in perpetuum peribunt.
     .grc = Τὸ «{ $name }» καὶ πᾶσαι αἱ λέξεις αὐτοῦ εἰς ἀεὶ ἀπολοῦνται.
+    .zh = “{ $name }”和其中所有单词将被永久删除。
+    .ko = "{ $name }"와(과) 모든 단어가 영원히 사라져요.
+    .ja = 「{ $name }」とすべての単語が完全に消えます。
+    .ar = سيختفي «{ $name }» وكل كلماته إلى الأبد.
 
 delete-confirm =
     .en = 🗑 Yes, delete
@@ -521,6 +585,10 @@ delete-confirm =
     .uk = 🗑 Так, видалити
     .la = 🗑 Ita, dele
     .grc = 🗑 Ναί, ἀπάλειψον
+    .zh = 🗑 是的，删除
+    .ko = 🗑 네, 삭제할게요
+    .ja = 🗑 はい、削除します
+    .ar = 🗑 نعم، احذف
 
 delete-keep =
     .en = No, keep it
@@ -548,6 +616,10 @@ delete-keep =
     .uk = Ні, залишити
     .la = Minime, serva
     .grc = Οὐ δῆτα, φύλαξον
+    .zh = 不，保留
+    .ko = 아니요, 그대로 둘게요
+    .ja = いいえ、残します
+    .ar = لا، احتفظ به
 
 ## Share and import
 
@@ -577,6 +649,10 @@ share =
     .uk = 📤 Поділитися
     .la = 📤 Communica
     .grc = 📤 Μετάδος
+    .zh = 📤 分享
+    .ko = 📤 공유
+    .ja = 📤 共有
+    .ar = 📤 مشاركة
 
 import =
     .en = 📥 Import
@@ -604,6 +680,10 @@ import =
     .uk = 📥 Імпорт
     .la = 📥 Importa
     .grc = 📥 Εἰσάγαγε
+    .zh = 📥 导入
+    .ko = 📥 가져오기
+    .ja = 📥 読み込み
+    .ar = 📥 استيراد
 
 share-title =
     .en = Share "{ $name }"
@@ -631,6 +711,10 @@ share-title =
     .uk = Поділитися «{ $name }»
     .la = Communica "{ $name }"
     .grc = Μετάδος τὸ «{ $name }»
+    .zh = 分享“{ $name }”
+    .ko = "{ $name }" 공유
+    .ja = 「{ $name }」を共有
+    .ar = مشاركة «{ $name }»
 
 share-body =
     .en = Copy it as text or as a QR picture and send it, e.g. via WhatsApp or Signal. The other person pastes the text or scans the QR code under 📥 Import.
@@ -658,6 +742,10 @@ share-body =
     .uk = Скопіюй проєкт як текст або як QR-зображення і надішли, наприклад, через WhatsApp або Signal. Інша людина вставляє текст або сканує QR-код у розділі 📥 Імпорт.
     .la = Exscribe ut textum aut ut imaginem QR et mitte, e.g. per WhatsApp aut Signal. Alter textum inserit aut codicem QR sub 📥 Importa legit.
     .grc = Ἀντίγραψον ὡς κείμενον ἢ ὡς εἰκόνα QR καὶ πέμψον, οἷον διὰ WhatsApp ἢ Signal. Ὁ ἕτερος ἢ τὸ κείμενον ἐντίθησιν ἢ τὸν κώδικα QR ἀναγιγνώσκει ἐν τῷ 📥 Εἰσάγαγε.
+    .zh = 以文字或二维码图片的形式复制并发送，例如通过微信、WhatsApp 或 Signal。对方在 📥 导入 中粘贴文字或扫描二维码。
+    .ko = 텍스트나 QR 그림으로 복사해서 보내세요. 예: 카카오톡, WhatsApp, Signal. 받는 사람은 📥 가져오기에서 텍스트를 붙여넣거나 QR 코드를 스캔해요.
+    .ja = テキストまたはQRコードの画像としてコピーし、LINE・WhatsApp・Signal などで送ってください。相手は 📥 読み込み でテキストを貼り付けるか、QRコードを読み取ります。
+    .ar = انسخه كنص أو كصورة QR وأرسله، مثلا عبر WhatsApp أو Signal. يلصق الشخص الآخر النص أو يمسح رمز QR من 📥 استيراد.
 
 qr-too-big =
     .en = This project is too big for a QR code. Use the code below.
@@ -685,6 +773,10 @@ qr-too-big =
     .uk = Цей проєкт завеликий для QR-коду. Використай код нижче.
     .la = Hoc opus maius est quam ut codice QR contineatur. Codice infra utere.
     .grc = Τοῦτο τὸ ἔργον μεῖζόν ἐστιν ἢ ὥστε κώδικι QR χωρεῖσθαι. Χρῶ τῷ κώδικι τῷ κάτω.
+    .zh = 这个单词本太大，无法生成二维码。请使用下面的代码。
+    .ko = 이 단어장은 QR 코드로 만들기에 너무 커요. 아래 코드를 사용하세요.
+    .ja = この単語帳はQRコードにするには大きすぎます。下のコードを使ってください。
+    .ar = هذا المشروع كبير جدا على رمز QR. استخدم الرمز أدناه.
 
 scan-qr =
     .en = 📷 Scan QR code
@@ -712,6 +804,10 @@ scan-qr =
     .uk = 📷 Сканувати QR-код
     .la = 📷 Codicem QR lege
     .grc = 📷 Ἀνάγνωθι κώδικα QR
+    .zh = 📷 扫描二维码
+    .ko = 📷 QR 코드 스캔
+    .ja = 📷 QRコードを読み取る
+    .ar = 📷 مسح رمز QR
 
 scan-stop =
     .en = ✖ Stop camera
@@ -739,6 +835,10 @@ scan-stop =
     .uk = ✖ Вимкнути камеру
     .la = ✖ Claude cameram
     .grc = ✖ Παῦσον τὴν μηχανήν
+    .zh = ✖ 关闭摄像头
+    .ko = ✖ 카메라 끄기
+    .ja = ✖ カメラを止める
+    .ar = ✖ إيقاف الكاميرا
 
 camera-error =
     .en = The camera could not be started. Please allow camera access.
@@ -766,6 +866,10 @@ camera-error =
     .uk = Не вдалося увімкнути камеру. Будь ласка, дозволь доступ до камери.
     .la = Camera incipi non potuit. Quaeso, aditum ad cameram permitte.
     .grc = Ἡ φωτογραφικὴ μηχανὴ οὐκ ἠδυνήθη ἄρξασθαι. Ἐπίτρεψον τὴν πρόσοδον.
+    .zh = 无法启动摄像头。请允许访问摄像头。
+    .ko = 카메라를 켤 수 없어요. 카메라 접근을 허용해 주세요.
+    .ja = カメラを起動できませんでした。カメラへのアクセスを許可してください。
+    .ar = تعذر تشغيل الكاميرا. يرجى السماح بالوصول إلى الكاميرا.
 
 copy-text =
     .en = 📋 Copy as text
@@ -793,6 +897,10 @@ copy-text =
     .uk = 📋 Копіювати як текст
     .la = 📋 Exscribe ut textum
     .grc = 📋 Ἀντίγραψον ὡς κείμενον
+    .zh = 📋 复制为文字
+    .ko = 📋 텍스트로 복사
+    .ja = 📋 テキストとしてコピー
+    .ar = 📋 نسخ كنص
 
 copy-qr =
     .en = 📋 Copy as QR picture
@@ -820,6 +928,10 @@ copy-qr =
     .uk = 📋 Копіювати як QR-зображення
     .la = 📋 Exscribe ut imaginem QR
     .grc = 📋 Ἀντίγραψον ὡς εἰκόνα QR
+    .zh = 📋 复制为二维码图片
+    .ko = 📋 QR 그림으로 복사
+    .ja = 📋 QRコード画像としてコピー
+    .ar = 📋 نسخ كصورة QR
 
 copied =
     .en = ✔ Copied!
@@ -847,6 +959,10 @@ copied =
     .uk = ✔ Скопійовано!
     .la = ✔ Exscriptum!
     .grc = ✔ Ἀντεγράφη!
+    .zh = ✔ 已复制！
+    .ko = ✔ 복사했어요!
+    .ja = ✔ コピーしました！
+    .ar = ✔ تم النسخ!
 
 close =
     .en = Close
@@ -874,6 +990,10 @@ close =
     .uk = Закрити
     .la = Claude
     .grc = Κλεῖσον
+    .zh = 关闭
+    .ko = 닫기
+    .ja = 閉じる
+    .ar = إغلاق
 
 import-title =
     .en = Import a project
@@ -901,6 +1021,10 @@ import-title =
     .uk = Імпорт проєкту
     .la = Opus importa
     .grc = Εἰσάγαγε ἔργον
+    .zh = 导入单词本
+    .ko = 단어장 가져오기
+    .ja = 単語帳を読み込む
+    .ar = استيراد مشروع
 
 import-body =
     .en = Paste the code you received:
@@ -928,6 +1052,10 @@ import-body =
     .uk = Встав отриманий код:
     .la = Insere codicem quem accepisti:
     .grc = Ἔνθες τὸν κώδικα ὃν ἔλαβες:
+    .zh = 粘贴你收到的代码：
+    .ko = 받은 코드를 붙여넣으세요:
+    .ja = 受け取ったコードを貼り付けてください：
+    .ar = الصق الرمز الذي وصلك:
 
 import-hint =
     .en = Paste the code here
@@ -955,6 +1083,10 @@ import-hint =
     .uk = Встав код сюди
     .la = Hic codicem insere
     .grc = Ἐνθάδε ἔνθες τὸν κώδικα
+    .zh = 在此粘贴代码
+    .ko = 여기에 코드를 붙여넣으세요
+    .ja = ここにコードを貼り付け
+    .ar = الصق الرمز هنا
 
 paste =
     .en = 📋 Paste
@@ -982,6 +1114,10 @@ paste =
     .uk = 📋 Вставити
     .la = 📋 Insere
     .grc = 📋 Ἔνθες
+    .zh = 📋 粘贴
+    .ko = 📋 붙여넣기
+    .ja = 📋 貼り付け
+    .ar = 📋 لصق
 
 paste-text-or-qr =
     .en = 📋 Paste text or QR picture
@@ -1009,6 +1145,10 @@ paste-text-or-qr =
     .uk = 📋 Вставити текст або QR-зображення
     .la = 📋 Insere textum aut imaginem QR
     .grc = 📋 Ἔνθες κείμενον ἢ εἰκόνα QR
+    .zh = 📋 粘贴文字或二维码图片
+    .ko = 📋 텍스트 또는 QR 그림 붙여넣기
+    .ja = 📋 テキストかQR画像を貼り付け
+    .ar = 📋 لصق نص أو صورة QR
 
 paste-empty =
     .en = There is nothing to paste.
@@ -1036,6 +1176,10 @@ paste-empty =
     .uk = Немає чого вставляти.
     .la = Nihil est quod inseras.
     .grc = Οὐδέν ἐστιν ὃ ἐνθήσεις.
+    .zh = 没有可粘贴的内容。
+    .ko = 붙여넣을 내용이 없어요.
+    .ja = 貼り付けるものがありません。
+    .ar = لا يوجد شيء للصق.
 
 qr-not-found =
     .en = No QR code found in the copied picture.
@@ -1063,6 +1207,10 @@ qr-not-found =
     .uk = На скопійованому зображенні немає QR-коду.
     .la = In imagine exscripta nullus codex QR inventus est.
     .grc = Ἐν τῇ ἀντιγραφείσῃ εἰκόνι οὐδεὶς κῶδιξ QR εὑρέθη.
+    .zh = 复制的图片中没有找到二维码。
+    .ko = 복사한 그림에서 QR 코드를 찾지 못했어요.
+    .ja = コピーした画像にQRコードが見つかりません。
+    .ar = لم يتم العثور على رمز QR في الصورة المنسوخة.
 
 import-preview =
     .en =
@@ -1191,6 +1339,18 @@ import-preview =
             [one] «{ $name }» σὺν { $count } λέξει
            *[other] «{ $name }» σὺν { $count } λέξεσιν
         }
+    .zh = “{ $name }”，共 { $count } 个单词
+    .ko = "{ $name }" (단어 { $count }개)
+    .ja = 「{ $name }」（{ $count } 語）
+    .ar =
+        «{ $name }» – { $count ->
+            [zero] لا كلمات
+            [one] كلمة واحدة
+            [two] كلمتان
+            [few] { $count } كلمات
+            [many] { $count } كلمة
+           *[other] { $count } كلمة
+        }
 
 import-invalid =
     .en = This code doesn't look right. Did you copy all of it?
@@ -1218,6 +1378,10 @@ import-invalid =
     .uk = Цей код виглядає неправильно. Ти скопіював(ла) його повністю?
     .la = Hic codex rectus non videtur. Totumne exscripsisti?
     .grc = Οὗτος ὁ κῶδιξ οὐκ ὀρθὸς φαίνεται. Ἆρα ὅλον ἀντέγραψας;
+    .zh = 这个代码好像不对。你复制完整了吗？
+    .ko = 코드가 올바르지 않은 것 같아요. 전부 복사했나요?
+    .ja = このコードは正しくないようです。全部コピーしましたか？
+    .ar = يبدو أن هذا الرمز غير صحيح. هل نسخته كاملا؟
 
 ## Welcome screen
 
@@ -1247,6 +1411,10 @@ welcome-title =
     .uk = Ласкаво просимо до Vocadada!
     .la = Salve! Bene venisti ad Vocadada!
     .grc = Χαῖρε! Καλῶς ἦλθες εἰς τὴν Vocadada!
+    .zh = 欢迎来到 Vocadada！
+    .ko = Vocadada에 오신 것을 환영해요!
+    .ja = Vocadada へようこそ！
+    .ar = مرحبا بك في Vocadada!
 
 welcome-body =
     .en = Create your first project to start learning words.
@@ -1274,6 +1442,10 @@ welcome-body =
     .uk = Створи свій перший проєкт і почни вивчати слова.
     .la = Primum opus tuum crea ut verba discere incipias.
     .grc = Ποίησον τὸ πρῶτον ἔργον σου, ἵνα λέξεις μανθάνειν ἄρξῃ.
+    .zh = 创建你的第一个单词本，开始学单词吧。
+    .ko = 첫 단어장을 만들고 단어를 배워 보세요.
+    .ja = 最初の単語帳を作って、単語をおぼえはじめよう。
+    .ar = أنشئ مشروعك الأول لتبدأ بتعلم الكلمات.
 
 ## Mode tabs
 
@@ -1303,6 +1475,10 @@ tab-edit =
     .uk = ✏ Редагувати
     .la = ✏ Muta
     .grc = ✏ Μεταβάλλε
+    .zh = ✏ 编辑
+    .ko = ✏ 편집
+    .ja = ✏ 編集
+    .ar = ✏ تعديل
 
 tab-view =
     .en = 👀 View
@@ -1330,6 +1506,10 @@ tab-view =
     .uk = 👀 Переглянути
     .la = 👀 Specta
     .grc = 👀 Θεῶ
+    .zh = 👀 浏览
+    .ko = 👀 보기
+    .ja = 👀 見る
+    .ar = 👀 عرض
 
 tab-test =
     .en = 🎯 Test
@@ -1357,6 +1537,10 @@ tab-test =
     .uk = 🎯 Тест
     .la = 🎯 Proba
     .grc = 🎯 Πειρῶ
+    .zh = 🎯 测试
+    .ko = 🎯 테스트
+    .ja = 🎯 テスト
+    .ar = 🎯 اختبار
 
 ## Edit mode
 
@@ -1386,6 +1570,10 @@ languages =
     .uk = 🌍 Мови
     .la = 🌍 Linguae
     .grc = 🌍 Γλῶτται
+    .zh = 🌍 语言
+    .ko = 🌍 언어
+    .ja = 🌍 言語
+    .ar = 🌍 اللغات
 
 language-1-hint =
     .en = e.g. English
@@ -1413,6 +1601,10 @@ language-1-hint =
     .uk = напр. англійська
     .la = e.g. Anglica
     .grc = οἷον Ἀγγλική
+    .zh = 例如：英语
+    .ko = 예: 영어
+    .ja = 例：英語
+    .ar = مثلا: الإنجليزية
 
 language-2-hint =
     .en = e.g. French
@@ -1440,6 +1632,10 @@ language-2-hint =
     .uk = напр. французька
     .la = e.g. Francogallica
     .grc = οἷον Γαλλική
+    .zh = 例如：法语
+    .ko = 예: 프랑스어
+    .ja = 例：フランス語
+    .ar = مثلا: الفرنسية
 
 default-language-1 =
     .en = Language 1
@@ -1467,6 +1663,10 @@ default-language-1 =
     .uk = Мова 1
     .la = Lingua I
     .grc = Γλῶττα Αʹ
+    .zh = 语言 1
+    .ko = 언어 1
+    .ja = 言語 1
+    .ar = اللغة 1
 
 default-language-2 =
     .en = Language 2
@@ -1494,6 +1694,10 @@ default-language-2 =
     .uk = Мова 2
     .la = Lingua II
     .grc = Γλῶττα Βʹ
+    .zh = 语言 2
+    .ko = 언어 2
+    .ja = 言語 2
+    .ar = اللغة 2
 
 add-word-title =
     .en = ➕ Add a new word
@@ -1521,6 +1725,10 @@ add-word-title =
     .uk = ➕ Додати нове слово
     .la = ➕ Novum verbum adde
     .grc = ➕ Πρόσθες νέαν λέξιν
+    .zh = ➕ 添加新单词
+    .ko = ➕ 새 단어 추가
+    .ja = ➕ 新しい単語を追加
+    .ar = ➕ أضف كلمة جديدة
 
 add =
     .en = Add
@@ -1548,6 +1756,10 @@ add =
     .uk = Додати
     .la = Adde
     .grc = Πρόσθες
+    .zh = 添加
+    .ko = 추가
+    .ja = 追加
+    .ar = إضافة
 
 add-word-tip =
     .en = Tip: press Enter to jump to the next box.
@@ -1575,6 +1787,10 @@ add-word-tip =
     .uk = Порада: натисни Enter, щоб перейти до наступного поля.
     .la = Consilium: preme Enter ut ad proximam capsam transeas.
     .grc = Συμβουλή: πίεσον Enter, ἵνα εἰς τὸ ἑπόμενον πεδίον μεταβῇς.
+    .zh = 提示：按 Enter 跳到下一个输入框。
+    .ko = 팁: Enter를 누르면 다음 칸으로 넘어가요.
+    .ja = ヒント：Enter で次の欄に進みます。
+    .ar = نصيحة: اضغط Enter للانتقال إلى الخانة التالية.
 
 add-word-tip-desktop =
     .en = Tip: press Enter to jump to the next box, Shift+Enter for a new line in the example.
@@ -1602,6 +1818,10 @@ add-word-tip-desktop =
     .uk = Порада: натисни Enter, щоб перейти до наступного поля, і Shift+Enter для нового рядка в прикладі.
     .la = Consilium: preme Enter ut ad proximam capsam transeas, Shift+Enter ut novum versum in exemplo incipias.
     .grc = Συμβουλή: πίεσον Enter, ἵνα εἰς τὸ ἑπόμενον πεδίον μεταβῇς, Shift+Enter δέ, ἵνα νέον στίχον ἐν τῷ παραδείγματι ἄρξῃ.
+    .zh = 提示：按 Enter 跳到下一个输入框，按 Shift+Enter 在例句中换行。
+    .ko = 팁: Enter를 누르면 다음 칸으로, Shift+Enter를 누르면 예문에서 줄이 바뀌어요.
+    .ja = ヒント：Enter で次の欄に進み、Shift+Enter で例文を改行します。
+    .ar = نصيحة: اضغط Enter للانتقال إلى الخانة التالية، و Shift+Enter لسطر جديد في المثال.
 
 no-words-edit =
     .en = No words yet! Add your first word below.
@@ -1629,6 +1849,10 @@ no-words-edit =
     .uk = Поки що немає слів! Додай перше слово нижче.
     .la = Nondum ulla verba! Primum verbum infra adde.
     .grc = Οὐδεμία λέξις ἔτι! Πρόσθες τὴν πρώτην κάτω.
+    .zh = 还没有单词！在下面添加第一个单词吧。
+    .ko = 아직 단어가 없어요! 아래에서 첫 단어를 추가하세요.
+    .ja = まだ単語がありません！下で最初の単語を追加しましょう。
+    .ar = لا توجد كلمات بعد! أضف أول كلمة في الأسفل.
 
 remove-word =
     .en = Remove this word
@@ -1656,6 +1880,10 @@ remove-word =
     .uk = Видалити це слово
     .la = Hoc verbum remove
     .grc = Ἄφελε ταύτην τὴν λέξιν
+    .zh = 删除这个单词
+    .ko = 이 단어 삭제
+    .ja = この単語を削除
+    .ar = احذف هذه الكلمة
 
 example =
     .en = 💬 Example
@@ -1683,6 +1911,10 @@ example =
     .uk = 💬 Приклад
     .la = 💬 Exemplum
     .grc = 💬 Παράδειγμα
+    .zh = 💬 例句
+    .ko = 💬 예문
+    .ja = 💬 例文
+    .ar = 💬 مثال
 
 example-hint =
     .en = Example (optional)
@@ -1710,6 +1942,10 @@ example-hint =
     .uk = Приклад (необов'язково)
     .la = Exemplum (si vis)
     .grc = Παράδειγμα (εἰ βούλει)
+    .zh = 例句（可选）
+    .ko = 예문 (선택)
+    .ja = 例文（任意）
+    .ar = مثال (اختياري)
 
 ## View mode
 
@@ -1739,6 +1975,10 @@ no-words-view =
     .uk = Поки що нічого переглядати. Додай слова в режимі ✏ Редагувати!
     .la = Nondum ulla verba spectanda. Adde aliqua in ✏ Muta!
     .grc = Οὐδεμία λέξις ἔτι θεατή. Πρόσθες τινὰς ἐν τῷ ✏ Μεταβάλλε!
+    .zh = 还没有可浏览的单词。去 ✏ 编辑 里添加一些吧！
+    .ko = 아직 볼 단어가 없어요. ✏ 편집에서 단어를 추가하세요!
+    .ja = まだ見る単語がありません。✏ 編集 で追加しましょう！
+    .ar = لا توجد كلمات لعرضها بعد. أضف بعضها في ✏ تعديل!
 
 shuffle =
     .en = 🔀 Shuffle
@@ -1766,6 +2006,10 @@ shuffle =
     .uk = 🔀 Перемішати
     .la = 🔀 Misce
     .grc = 🔀 Μῖξον
+    .zh = 🔀 打乱
+    .ko = 🔀 섞기
+    .ja = 🔀 シャッフル
+    .ar = 🔀 خلط
 
 original-order =
     .en = ↩ Original order
@@ -1793,6 +2037,10 @@ original-order =
     .uk = ↩ Початковий порядок
     .la = ↩ Ordo pristinus
     .grc = ↩ Ἡ ἀρχαία τάξις
+    .zh = ↩ 原始顺序
+    .ko = ↩ 원래 순서
+    .ja = ↩ 元の順番
+    .ar = ↩ الترتيب الأصلي
 
 hide =
     .en = 🙈 Hide
@@ -1820,6 +2068,10 @@ hide =
     .uk = 🙈 Сховати
     .la = 🙈 Cela
     .grc = 🙈 Κρύψον
+    .zh = 🙈 隐藏
+    .ko = 🙈 가리기
+    .ja = 🙈 かくす
+    .ar = 🙈 إخفاء
 
 tap-to-peek =
     .en = ❓ Tap to peek
@@ -1847,6 +2099,10 @@ tap-to-peek =
     .uk = ❓ Натисни, щоб підглянути
     .la = ❓ Tange ut videas
     .grc = ❓ Ἅψαι, ἵνα ἴδῃς
+    .zh = ❓ 点一下偷看
+    .ko = ❓ 눌러서 살짝 보기
+    .ja = ❓ タップしてのぞく
+    .ar = ❓ المس لتلقي نظرة
 
 show-example =
     .en = Show example
@@ -1874,6 +2130,10 @@ show-example =
     .uk = Показати приклад
     .la = Exemplum monstra
     .grc = Δεῖξον τὸ παράδειγμα
+    .zh = 显示例句
+    .ko = 예문 보기
+    .ja = 例文を見る
+    .ar = عرض المثال
 
 ## Test mode
 
@@ -1903,6 +2163,10 @@ no-words-test =
     .uk = Поки що немає слів для тесту. Спочатку додай їх у режимі ✏ Редагувати!
     .la = Nondum ulla verba probanda. Adde prius aliqua in ✏ Muta!
     .grc = Οὐδεμία λέξις ἔτι πειρατέα. Πρῶτον πρόσθες τινὰς ἐν τῷ ✏ Μεταβάλλε!
+    .zh = 还没有可测试的单词。先去 ✏ 编辑 里添加一些吧！
+    .ko = 아직 테스트할 단어가 없어요. 먼저 ✏ 편집에서 단어를 추가하세요!
+    .ja = まだテストする単語がありません。まず ✏ 編集 で追加しましょう！
+    .ar = لا توجد كلمات للاختبار بعد. أضف بعضها أولا في ✏ تعديل!
 
 test-direction-question =
     .en = Which way do you want to practise?
@@ -1930,6 +2194,10 @@ test-direction-question =
     .uk = У якому напрямку будемо тренуватися?
     .la = Quam in partem exerceri vis?
     .grc = Ποῖ βούλει ἀσκεῖσθαι;
+    .zh = 你想按哪个方向练习？
+    .ko = 어느 방향으로 연습할까요?
+    .ja = どちらの方向で練習しますか？
+    .ar = في أي اتجاه تريد أن تتدرب؟
 
 words-waiting =
     .en =
@@ -2069,6 +2337,18 @@ words-waiting =
             [one] Μία λέξις σε περιμένει!
            *[other] { $count } λέξεις σε περιμένουσιν!
         }
+    .zh = { $count } 个单词在等你！
+    .ko = 단어 { $count }개가 기다리고 있어요!
+    .ja = { $count } 語があなたを待っています！
+    .ar =
+        { $count ->
+            [zero] لا توجد كلمات بانتظارك!
+            [one] كلمة واحدة بانتظارك!
+            [two] كلمتان بانتظارك!
+            [few] { $count } كلمات بانتظارك!
+            [many] { $count } كلمة بانتظارك!
+           *[other] { $count } كلمة بانتظارك!
+        }
 
 check-answer =
     .en = Check the answer
@@ -2096,6 +2376,10 @@ check-answer =
     .uk = Перевірити відповідь
     .la = Responsum inspice
     .grc = Σκέψαι τὴν ἀπόκρισιν
+    .zh = 查看答案
+    .ko = 정답 확인
+    .ja = 答えを見る
+    .ar = تحقق من الإجابة
 
 the-answer-is =
     .en = The answer is
@@ -2123,6 +2407,10 @@ the-answer-is =
     .uk = Правильна відповідь
     .la = Responsum est
     .grc = Ἡ ἀπόκρισίς ἐστιν
+    .zh = 答案是
+    .ko = 정답은
+    .ja = 答えは
+    .ar = الإجابة هي
 
 answer-knew =
     .en = ✔ I knew
@@ -2150,6 +2438,10 @@ answer-knew =
     .uk = ✔ Я знав(ла)
     .la = ✔ Sciebam
     .grc = ✔ Ἤιδειν
+    .zh = ✔ 我会
+    .ko = ✔ 알았어요
+    .ja = ✔ わかった
+    .ar = ✔ كنت أعرفها
 
 answer-did-not-know =
     .en = ✖ I did not know
@@ -2177,6 +2469,10 @@ answer-did-not-know =
     .uk = ✖ Я не знав(ла)
     .la = ✖ Nesciebam
     .grc = ✖ Οὐκ ᾔδειν
+    .zh = ✖ 我不会
+    .ko = ✖ 몰랐어요
+    .ja = ✖ わからなかった
+    .ar = ✖ لم أكن أعرفها
 
 finish =
     .en = 🏁 Finish
@@ -2204,6 +2500,10 @@ finish =
     .uk = 🏁 Завершити
     .la = 🏁 Fini
     .grc = 🏁 Τέλος
+    .zh = 🏁 结束
+    .ko = 🏁 끝내기
+    .ja = 🏁 終わる
+    .ar = 🏁 إنهاء
 
 good-answers =
     .en = Good answers
@@ -2231,6 +2531,10 @@ good-answers =
     .uk = Правильні відповіді
     .la = Recte responsa
     .grc = Ὀρθαὶ ἀποκρίσεις
+    .zh = 答对
+    .ko = 맞힌 답
+    .ja = 正解
+    .ar = إجابات صحيحة
 
 mistakes-label =
     .en = Mistakes
@@ -2258,6 +2562,10 @@ mistakes-label =
     .uk = Помилки
     .la = Errores
     .grc = Ἁμαρτήματα
+    .zh = 错误
+    .ko = 틀린 답
+    .ja = まちがい
+    .ar = أخطاء
 
 ## Test results
 
@@ -2287,6 +2595,10 @@ result-perfect =
     .uk = ІДЕАЛЬНО! Ти суперзірка!
     .la = PERFECTUM! Stella es!
     .grc = ΤΕΛΕΙΟΝ! Ἀστὴρ εἶ!
+    .zh = 完美！你是超级明星！
+    .ko = 완벽해요! 당신은 슈퍼스타!
+    .ja = パーフェクト！あなたはスーパースター！
+    .ar = ممتاز! أنت نجم!
 
 result-all-known =
     .en = Hooray! You learned all the words!
@@ -2314,6 +2626,10 @@ result-all-known =
     .uk = Ура! Ти вивчив(ла) всі слова!
     .la = Io! Omnia verba didicisti!
     .grc = Εὖγε! Πάσας τὰς λέξεις ἔμαθες!
+    .zh = 太棒了！你学会了所有单词！
+    .ko = 만세! 모든 단어를 배웠어요!
+    .ja = やったね！すべての単語をおぼえました！
+    .ar = رائع! لقد تعلمت كل الكلمات!
 
 result-good =
     .en = Well done! Keep it up!
@@ -2341,6 +2657,10 @@ result-good =
     .uk = Молодець! Так тримати!
     .la = Bene fecisti! Perge!
     .grc = Καλῶς ἐποίησας! Οὕτω πρόβαινε!
+    .zh = 做得好！继续加油！
+    .ko = 잘했어요! 계속 이렇게 해요!
+    .ja = よくできました！その調子！
+    .ar = أحسنت! استمر هكذا!
 
 result-start =
     .en = Good start! Practice makes perfect!
@@ -2368,6 +2688,10 @@ result-start =
     .uk = Гарний початок! Повторення — мати навчання!
     .la = Bonum initium! Usus est magister optimus!
     .grc = Ἀρχὴ ἥμισυ παντός! Μελέτη τὸ πᾶν!
+    .zh = 好的开始！熟能生巧！
+    .ko = 좋은 시작이에요! 연습이 완벽을 만들어요!
+    .ja = いいスタート！練習あるのみ！
+    .ar = بداية جيدة! التمرين يصنع الإتقان!
 
 known-of-total =
     .en = { $known } of { $total }
@@ -2395,6 +2719,10 @@ known-of-total =
     .uk = { $known } з { $total }
     .la = { $known } ex { $total }
     .grc = { $known } ἐκ { $total }
+    .zh = { $known } / { $total }
+    .ko = { $total }개 중 { $known }개
+    .ja = { $total } 語中 { $known } 語
+    .ar = { $known } من { $total }
 
 first-try =
     .en = Right on the first try: { $count } of { $total }
@@ -2422,6 +2750,10 @@ first-try =
     .uk = З першої спроби: { $count } з { $total }
     .la = Primo conatu recte: { $count } ex { $total }
     .grc = Τῇ πρώτῃ πείρᾳ ὀρθῶς: { $count } ἐκ { $total }
+    .zh = 第一次就答对：{ $count } / { $total }
+    .ko = 한 번에 맞힌 단어: { $total }개 중 { $count }개
+    .ja = 1回目で正解：{ $total } 語中 { $count } 語
+    .ar = صحيحة من المحاولة الأولى: { $count } من { $total }
 
 mistakes-count =
     .en =
@@ -2586,6 +2918,30 @@ mistakes-count =
             [one] 1 ἁμάρτημα
            *[other] { $count } ἁμαρτήματα
         }
+    .zh =
+        { $count ->
+            [0] 一个错误也没有！
+           *[other] { $count } 个错误
+        }
+    .ko =
+        { $count ->
+            [0] 하나도 안 틀렸어요!
+           *[other] { $count }개 틀렸어요
+        }
+    .ja =
+        { $count ->
+            [0] まちがいはひとつもありません！
+           *[other] まちがい { $count } 回
+        }
+    .ar =
+        { $count ->
+            [0] ولا خطأ واحد!
+            [one] خطأ واحد
+            [two] خطآن
+            [few] { $count } أخطاء
+            [many] { $count } خطأ
+           *[other] { $count } خطأ
+        }
 
 words-to-practise =
     .en = Words to practise again
@@ -2613,6 +2969,10 @@ words-to-practise =
     .uk = Слова для повторення
     .la = Verba iterum exercenda
     .grc = Λέξεις αὖθις ἀσκητέαι
+    .zh = 需要再练习的单词
+    .ko = 다시 연습할 단어
+    .ja = もう一度練習する単語
+    .ar = كلمات للتدرب عليها مرة أخرى
 
 play-again =
     .en = 🔁 Play again
@@ -2640,6 +3000,10 @@ play-again =
     .uk = 🔁 Ще раз
     .la = 🔁 Iterum lude
     .grc = 🔁 Αὖθις
+    .zh = 🔁 再玩一次
+    .ko = 🔁 다시 하기
+    .ja = 🔁 もう一度
+    .ar = 🔁 العب مرة أخرى
 
 practise-hard-words =
     .en = 💪 Practise hard words
@@ -2667,6 +3031,10 @@ practise-hard-words =
     .uk = 💪 Повторити складні слова
     .la = 💪 Difficilia verba exerce
     .grc = 💪 Ἄσκει τὰς χαλεπὰς λέξεις
+    .zh = 💪 练习难词
+    .ko = 💪 어려운 단어 연습
+    .ja = 💪 むずかしい単語を練習
+    .ar = 💪 تدرب على الكلمات الصعبة
 
 back =
     .en = ⬅ Back
@@ -2694,6 +3062,10 @@ back =
     .uk = ⬅ Назад
     .la = ⬅ Redi
     .grc = ⬅ Ἐπάνελθε
+    .zh = ⬅ 返回
+    .ko = ⬅ 뒤로
+    .ja = ⬅ もどる
+    .ar = ⬅ رجوع
 
 ## Messages
 
@@ -2723,6 +3095,10 @@ ok =
     .uk = OK
     .la = Bene
     .grc = Εὖ ἔχει
+    .zh = 好的
+    .ko = 확인
+    .ja = OK
+    .ar = حسنا
 
 error-save =
     .en = Could not save: { $error }
@@ -2750,6 +3126,10 @@ error-save =
     .uk = Не вдалося зберегти: { $error }
     .la = Servari non potuit: { $error }
     .grc = Οὐκ ἠδυνήθη σῴζεσθαι: { $error }
+    .zh = 无法保存：{ $error }
+    .ko = 저장할 수 없어요: { $error }
+    .ja = 保存できませんでした：{ $error }
+    .ar = تعذر الحفظ: { $error }
 
 error-read =
     .en = Could not read { $path }: { $error }
@@ -2777,6 +3157,10 @@ error-read =
     .uk = Не вдалося прочитати { $path }: { $error }
     .la = { $path } legi non potuit: { $error }
     .grc = Τὸ { $path } οὐκ ἠδυνήθη ἀναγνωσθῆναι: { $error }
+    .zh = 无法读取 { $path }：{ $error }
+    .ko = { $path }을(를) 읽을 수 없어요: { $error }
+    .ja = { $path } を読み込めませんでした：{ $error }
+    .ar = تعذرت قراءة { $path }: { $error }
 
 error-broken-file =
     .en = Saved projects could not be read ({ $error }). A copy was kept at { $path }
@@ -2804,6 +3188,10 @@ error-broken-file =
     .uk = Не вдалося прочитати збережені проєкти ({ $error }). Копію збережено в { $path }
     .la = Opera servata legi non potuerunt ({ $error }). Exemplar servatum est in { $path }
     .grc = Τὰ σῳζόμενα ἔργα οὐκ ἠδυνήθη ἀναγνωσθῆναι ({ $error }). Ἀντίγραφον ἐφυλάχθη ἐν { $path }
+    .zh = 无法读取已保存的单词本（{ $error }）。已在 { $path } 保留一份副本
+    .ko = 저장된 단어장을 읽을 수 없어요({ $error }). 복사본을 { $path }에 남겨 두었어요
+    .ja = 保存された単語帳を読み込めませんでした（{ $error }）。コピーを { $path } に残しました
+    .ar = تعذرت قراءة المشاريع المحفوظة ({ $error }). تم الاحتفاظ بنسخة في { $path }
 
 error-no-data-folder =
     .en = No data folder found
@@ -2831,6 +3219,10 @@ error-no-data-folder =
     .uk = Папку з даними не знайдено
     .la = Nullum scrinium datorum inventum
     .grc = Οὐδεμία θήκη δεδομένων εὑρέθη
+    .zh = 找不到数据文件夹
+    .ko = 데이터 폴더를 찾을 수 없어요
+    .ja = データフォルダが見つかりません
+    .ar = لم يتم العثور على مجلد البيانات
 
 error-storage-unavailable =
     .en = Browser storage is not available
@@ -2858,6 +3250,10 @@ error-storage-unavailable =
     .uk = Сховище браузера недоступне
     .la = Repositorium navigatri praesto non est
     .grc = Ἡ ἀποθήκη τοῦ περιηγητοῦ οὐ πάρεστιν
+    .zh = 浏览器存储不可用
+    .ko = 브라우저 저장소를 사용할 수 없어요
+    .ja = ブラウザのストレージが使えません
+    .ar = تخزين المتصفح غير متاح
 
 error-broken-storage =
     .en = Saved projects could not be read ({ $error }). A copy was kept in browser storage.
@@ -2885,6 +3281,10 @@ error-broken-storage =
     .uk = Не вдалося прочитати збережені проєкти ({ $error }). Копію збережено у сховищі браузера.
     .la = Opera servata legi non potuerunt ({ $error }). Exemplar in repositorio navigatri servatum est.
     .grc = Τὰ σῳζόμενα ἔργα οὐκ ἠδυνήθη ἀναγνωσθῆναι ({ $error }). Ἀντίγραφον ἐφυλάχθη ἐν τῇ ἀποθήκῃ τοῦ περιηγητοῦ.
+    .zh = 无法读取已保存的单词本（{ $error }）。已在浏览器存储中保留一份副本。
+    .ko = 저장된 단어장을 읽을 수 없어요({ $error }). 복사본을 브라우저 저장소에 남겨 두었어요.
+    .ja = 保存された単語帳を読み込めませんでした（{ $error }）。コピーをブラウザのストレージに残しました。
+    .ar = تعذرت قراءة المشاريع المحفوظة ({ $error }). تم الاحتفاظ بنسخة في تخزين المتصفح.
 
 error-storage-full =
     .en = Browser storage is full or blocked
@@ -2912,4 +3312,8 @@ error-storage-full =
     .uk = Сховище браузера заповнене або заблоковане
     .la = Repositorium navigatri plenum aut clausum est
     .grc = Ἡ ἀποθήκη τοῦ περιηγητοῦ πλήρης ἐστὶν ἢ κεκλεισμένη
+    .zh = 浏览器存储已满或被禁用
+    .ko = 브라우저 저장소가 가득 찼거나 차단되었어요
+    .ja = ブラウザのストレージがいっぱいか、ブロックされています
+    .ar = تخزين المتصفح ممتلئ أو محظور
 

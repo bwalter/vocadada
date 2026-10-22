@@ -5,7 +5,7 @@ use eframe::egui::{
 use rand::seq::SliceRandom;
 use std::collections::HashSet;
 
-use crate::i18n::{self, tr, Language};
+use crate::i18n::{self, tr, visual, Language};
 use crate::model::{Entry, Library, Project};
 use crate::quiz::{Direction, Quiz};
 use crate::share;
@@ -224,6 +224,7 @@ impl VocadadaApp {
         if let Some(language) = library.language.as_deref().and_then(Language::from_code) {
             i18n::set(language);
         }
+        crate::fonts::ensure_for(&cc.egui_ctx, library.texts());
         let selected = (!library.projects.is_empty()).then_some(0);
         Self {
             library,
@@ -394,7 +395,7 @@ impl VocadadaApp {
             } else {
                 (Color32::WHITE, theme::TEXT)
             };
-            let button = egui::Button::new(RichText::new(&project.name).size(20.0).strong().color(color))
+            let button = egui::Button::new(RichText::new(visual(&project.name)).size(20.0).strong().color(color))
                 .fill(fill)
                 .corner_radius(12)
                 .truncate()
@@ -722,7 +723,7 @@ impl VocadadaApp {
                     }
                     // Laid out after the tabs so a long name gets truncated instead of overlapping them.
                     ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
-                        let name = &self.library.projects[idx].name;
+                        let name = visual(&self.library.projects[idx].name);
                         ui.add(
                             egui::Label::new(RichText::new(name).size(32.0).strong().color(theme::PURPLE))
                                 .truncate(),
@@ -738,7 +739,7 @@ impl VocadadaApp {
                         self.show_projects = true;
                     }
                 }
-                let name = &self.library.projects[idx].name;
+                let name = visual(&self.library.projects[idx].name);
                 let size = if narrow { 28.0 } else { 32.0 };
                 ui.add(
                     egui::Label::new(RichText::new(name).size(size).strong().color(theme::PURPLE)).truncate(),
@@ -923,8 +924,8 @@ impl VocadadaApp {
                     .spacing(vec2(10.0, 8.0))
                     .show(ui, |ui| {
                         ui.label("");
-                        ui.label(RichText::new(&project.lang1).size(22.0).strong().color(theme::BLUE));
-                        ui.label(RichText::new(&project.lang2).size(22.0).strong().color(theme::ORANGE));
+                        ui.label(RichText::new(visual(&project.lang1)).size(22.0).strong().color(theme::BLUE));
+                        ui.label(RichText::new(visual(&project.lang2)).size(22.0).strong().color(theme::ORANGE));
                         ui.label(RichText::new(tr!("example")).size(22.0).strong().color(theme::TEXT_SOFT));
                         ui.label("");
                         ui.end_row();
@@ -998,7 +999,7 @@ impl VocadadaApp {
             ui.label(RichText::new(tr!("hide")).strong());
             for (col, lang, color) in [(0, &project.lang1, theme::BLUE), (1, &project.lang2, theme::ORANGE)] {
                 let active = self.view_hidden == Some(col);
-                if theme::tab_button(ui, lang, color, active, vec2(0.0, 40.0), 18.0).clicked() {
+                if theme::tab_button(ui, &visual(lang), color, active, vec2(0.0, 40.0), 18.0).clicked() {
                     self.view_hidden = (!active).then_some(col);
                     self.peeked.clear();
                 }
@@ -1014,8 +1015,8 @@ impl VocadadaApp {
                 ui.allocate_ui(vec2(words_w, 0.0), |ui| {
                     ui.set_width(words_w);
                     ui.columns(2, |cols| {
-                        cols[0].label(RichText::new(&project.lang1).size(22.0).strong().color(theme::BLUE));
-                        cols[1].label(RichText::new(&project.lang2).size(22.0).strong().color(theme::ORANGE));
+                        cols[0].label(RichText::new(visual(&project.lang1)).size(22.0).strong().color(theme::BLUE));
+                        cols[1].label(RichText::new(visual(&project.lang2)).size(22.0).strong().color(theme::ORANGE));
                     });
                 });
             });
@@ -1046,7 +1047,7 @@ impl VocadadaApp {
                                     let clicked = if hidden && !peeked {
                                         theme::hidden_word(ui, color).clicked()
                                     } else {
-                                        let label = egui::Label::new(RichText::new(word).size(26.0).color(dark));
+                                        let label = egui::Label::new(RichText::new(visual(word)).size(26.0).color(dark));
                                         ui.add(label.sense(Sense::click())).clicked()
                                     };
                                     if hidden && clicked {
@@ -1074,7 +1075,7 @@ impl VocadadaApp {
                         }
                         if show_example && !example.is_empty() {
                             ui.add(
-                                egui::Label::new(RichText::new(example).size(18.0).italics().color(theme::TEXT_SOFT))
+                                egui::Label::new(RichText::new(visual(example)).size(18.0).italics().color(theme::TEXT_SOFT))
                                     .wrap(),
                             );
                         }
@@ -1126,12 +1127,12 @@ impl VocadadaApp {
             );
             ui.add_space(24.0);
             let size = vec2(420.0_f32.min(ui.available_width()), 76.0);
-            let forward = format!("{}  ➡  {}", project.lang1, project.lang2);
+            let forward = format!("{}  ➡  {}", visual(&project.lang1), visual(&project.lang2));
             if big_button(ui, &forward, theme::BLUE, size).clicked() {
                 start = Some(Direction::OneToTwo);
             }
             ui.add_space(8.0);
-            let backward = format!("{}  ➡  {}", project.lang2, project.lang1);
+            let backward = format!("{}  ➡  {}", visual(&project.lang2), visual(&project.lang1));
             if big_button(ui, &backward, theme::ORANGE, size).clicked() {
                 start = Some(Direction::TwoToOne);
             }
@@ -1162,13 +1163,13 @@ impl VocadadaApp {
                 ui.set_min_height(if narrow { 120.0 } else { 180.0 });
                 ui.vertical_centered(|ui| {
                     ui.label(
-                        RichText::new(format!("{}  ➡  {}", quiz.question_lang, quiz.answer_lang))
+                        RichText::new(format!("{}  ➡  {}", visual(&quiz.question_lang), visual(&quiz.answer_lang)))
                             .size(18.0)
                             .color(theme::TEXT_SOFT),
                     );
                     ui.add_space(24.0);
                     ui.add(
-                        egui::Label::new(RichText::new(&card.question).size(56.0).strong().color(theme::PURPLE))
+                        egui::Label::new(RichText::new(visual(&card.question)).size(56.0).strong().color(theme::PURPLE))
                             .wrap(),
                     );
                 });
@@ -1195,7 +1196,7 @@ impl VocadadaApp {
                         ui.label(RichText::new(tr!("the-answer-is")).size(18.0).color(theme::GREEN_DARK));
                         ui.add(
                             egui::Label::new(
-                                RichText::new(&card.answer).size(46.0).strong().color(theme::GREEN_DARK),
+                                RichText::new(visual(&card.answer)).size(46.0).strong().color(theme::GREEN_DARK),
                             )
                             .wrap(),
                         );
@@ -1203,7 +1204,7 @@ impl VocadadaApp {
                             ui.add_space(4.0);
                             ui.add(
                                 egui::Label::new(
-                                    RichText::new(&card.example).size(20.0).italics().color(theme::GREEN_DARK),
+                                    RichText::new(visual(&card.example)).size(20.0).italics().color(theme::GREEN_DARK),
                                 )
                                 .wrap(),
                             );
@@ -1316,7 +1317,7 @@ impl VocadadaApp {
                                 .color(theme::ORANGE_DARK),
                         );
                         for card in &to_practice {
-                            ui.label(format!("{}  ➡  {}", card.question, card.answer));
+                            ui.label(format!("{}  ➡  {}", visual(&card.question), visual(&card.answer)));
                         }
                     });
                     ui.add_space(16.0);
@@ -1386,6 +1387,7 @@ impl eframe::App for VocadadaApp {
 
         if self.dirty {
             self.dirty = false;
+            crate::fonts::ensure_for(ctx, self.library.texts());
             if let Err(e) = self.library.save() {
                 self.message = Some(tr!("error-save", error = e));
             }
